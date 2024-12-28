@@ -18,7 +18,7 @@ namespace InvestProvider.Backend
 
     public class Phase
     {
-        public int Id { get; set; }
+        public string Id => $"{ProjectId}{Start}{End}"; // Hash of ProjectId, Start and End
         public int ProjectId { get; set; }
         public DateTime Start { get; set; }
         public DateTime End { get; set; }
@@ -28,8 +28,8 @@ namespace InvestProvider.Backend
     }
     public class UserData
     {
-        public int Id { get; set; }
-        public int PhaseId { get; set; }
+        public string Id =>  $"{PhaseId}{Address}"; // Hash of Address and PhaseId
+        public string PhaseId { get; set; }
         public string Address { get; set; } = null!;
         public decimal Amount { get; set; }
     }
