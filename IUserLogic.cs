@@ -11,7 +11,7 @@ namespace InvestProvider.Backend
         public (decimal,DateTime,DateTime)[] GetAllocation(string Address, int ProjectID)
         {
             return Db.PhaseList.Where(x => x.ProjectId == ProjectID)
-                .Select(x => (x.IsWhiteList? Db.UserDataList.FirstOrDefault(u => u.PhaseId == x.Id && u.Address == Address).Amount 
+                .Select(x => (x.IsWhiteList ? Db.UserDataList.FirstOrDefault(u => u.PhaseId == x.Id && u.Address == Address).Amount 
                 : x.MaxInvest,
                 x.Start, x.End)).ToArray();
         }
