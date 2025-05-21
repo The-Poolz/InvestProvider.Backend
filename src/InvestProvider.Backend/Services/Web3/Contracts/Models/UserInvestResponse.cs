@@ -6,5 +6,5 @@ namespace InvestProvider.Backend.Services.Web3.Contracts.Models;
 public class UserInvestResponse : IFunctionOutputDTO
 {
     [Parameter("tuple[]", "", order: 1)]
-    public List<UserInvest> Invests { get; set; } = [];
+    public List<UserInvestRpcOutput> Invests { get; set; } = [];
 }

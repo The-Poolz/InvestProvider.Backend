@@ -19,6 +19,6 @@ public class InvestProviderContract(IChainProvider chainProvider) : IInvestProvi
             .GetAwaiter()
             .GetResult();
 
-        return response?.Invests ?? [];
+        return response?.Invests.Select(x => new UserInvest(x)) ?? [];
     }
 }

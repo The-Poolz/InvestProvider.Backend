@@ -6,4 +6,7 @@ public class GenerateSignatureResponse
 {
     [JsonRequired]
     public string Signature { get; set; } = null!;
+
+    [JsonRequired]
+    public DateTime ValidUntil { get; set; }
 }

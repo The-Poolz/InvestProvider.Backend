@@ -26,7 +26,6 @@ public static class OnChainInfoRequest
                     }
                 }
             }
-
         });
         var chainFilter = new GraphQlQueryParameter<ChainFiltersInput>("chainFilter", new ChainFiltersInput
         {
@@ -53,9 +52,11 @@ public static class OnChainInfoRequest
             .WithParameter(chainFilter)
             .WithParameter(statusParam);
 
+        var query = queryBuilder.Build();
+
         return new GraphQLRequest
         {
-            Query = queryBuilder.Build()
+            Query = query
         };
     }
 }

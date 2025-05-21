@@ -13,5 +13,5 @@ public class GenerateSignatureRequest : IRequest<GenerateSignatureResponse>
     public EthereumAddress UserAddress { get; set; } = null!;
 
     [JsonRequired]
-    public string WeiAmount { get; set; }
+    public string WeiAmount { get; set; } = null!;
 }

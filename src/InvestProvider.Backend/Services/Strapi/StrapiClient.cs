@@ -12,7 +12,7 @@ namespace InvestProvider.Backend.Services.Strapi;
 
 public class StrapiClient : IStrapiClient
 {
-    public const string NameOfInvestedProvider = "InvestedProvider";
+    public const string NameOfInvestedProvider = "InvestProvider";
     public const string NameOfLockDealNFT = "LockDealNFT";
     public static readonly string ApiUrl = Env.STRAPI_GRAPHQL_URL.GetRequired<string>();
 
@@ -36,7 +36,7 @@ public class StrapiClient : IStrapiClient
 
         var chain = response.Data.Chains.First();
         var investedProvider = ExtractAddress(chain, NameOfInvestedProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
-        var lockDealNFT = ExtractAddress(chain, NameOfLockDealNFT, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
+        var lockDealNFT = ExtractAddress(chain, NameOfLockDealNFT, Error.LOCK_DEAL_NFT_NOT_SUPPORTED);
 
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }

@@ -5,6 +5,7 @@ namespace InvestProvider.Backend.Services.Web3;
 
 public interface IChainProvider
 {
+    public string RpcUrl(long chainId);
     public IWeb3 Web3(long chainId);
 
     public EthereumAddress InvestedProviderContract(long chainId);

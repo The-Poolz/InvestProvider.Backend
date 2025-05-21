@@ -9,10 +9,14 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider
 {
     private readonly Dictionary<long, OnChainInfo> ChainsInfo = new();
 
+    public string RpcUrl(long chainId)
+    {
+        return FetchChainInfo(chainId).RpcUrl;
+    }
+
     public IWeb3 Web3(long chainId)
     {
-        var chainInfo = FetchChainInfo(chainId);
-        return new Nethereum.Web3.Web3(chainInfo.RpcUrl);
+        return new Nethereum.Web3.Web3(RpcUrl(chainId));
     }
 
     public EthereumAddress InvestedProviderContract(long chainId) => FetchChainInfo(chainId).InvestedProvider;
