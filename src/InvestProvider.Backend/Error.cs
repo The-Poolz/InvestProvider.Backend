@@ -16,8 +16,8 @@ public enum Error
     INVEST_AMOUNT_IS_LESS_THAN_ALLOWED,
     [Error("Project phase not found.")]
     PROJECT_PHASE_NOT_FOUND,
-    [Error("Phase inactive.")]
-    PHASE_INACTIVE,
+    [Error("Active phase by provided project, not found.")]
+    NOT_FOUND_ACTIVE_PHASE,
     [Error("User for selected phase not found.")]
     USER_NOT_FOUND,
     [Error("Amount exceed the max invest amount.")]

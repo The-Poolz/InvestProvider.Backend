@@ -3,12 +3,12 @@ using Net.Cache;
 using Nethereum.Util;
 using System.Numerics;
 using Net.Cache.DynamoDb.ERC20;
+using Poolz.Finance.CSharp.Strapi;
 using Net.Cache.DynamoDb.ERC20.Models;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Web3.Eip712;
-using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
@@ -31,22 +31,20 @@ public class GenerateSignatureHandler(
 
     public Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
     {
-        var phase = strapi.ReceiveProjectPhase(request.PhaseId);
-        if (phase.StartTime >= DateTime.UtcNow || phase.EndTime < DateTime.UtcNow)
+        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
+        if (projectInfo.CurrentPhase == null)
         {
-            throw Error.PHASE_INACTIVE.ToException(new
+            throw Error.NOT_FOUND_ACTIVE_PHASE.ToException(new
             {
-                request.PhaseId,
-                phase.StartTime,
-                phase.EndTime
+                request.ProjectId
             });
         }
 
-        var tokenAddress = lockDealNFT.TokenOf(phase.ChainId, phase.PoolId);
+        var tokenAddress = lockDealNFT.TokenOf(projectInfo.ChainId, projectInfo.PoolId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(
-            phase.ChainId,
+            projectInfo.ChainId,
             tokenAddress,
-            chainProvider.RpcUrl(phase.ChainId)
+            chainProvider.RpcUrl(projectInfo.ChainId)
         )).Decimals;
 
         var amount = UnitConversion.Convert.FromWei(BigInteger.Parse(request.WeiAmount), decimals);
@@ -59,30 +57,30 @@ public class GenerateSignatureHandler(
             });
         }
 
-        if (userProvider.TryGet(request.PhaseId, out var userData))
+        if (userProvider.TryGet(projectInfo.CurrentPhase.Id, out var userData))
         {
             throw Error.USER_NOT_FOUND.ToException();
         }
-        var userInvestments = investProvider.GetUserInvests(phase.ChainId, phase.PoolId, request.UserAddress).ToArray();
-        var investAmounts = userInvestments.Where(x => x.BlockCreation >= phase.StartTime && x.BlockCreation < phase.EndTime).Sum(x => UnitConversion.Convert.FromWei(x.Amount, decimals));
-        if (phase.MaxInvest == 0)
+        var userInvestments = investProvider.GetUserInvests(projectInfo.ChainId, projectInfo.PoolId, request.UserAddress).ToArray();
+        var investAmounts = userInvestments.Where(x => x.BlockCreation >= projectInfo.CurrentPhase.Start && x.BlockCreation < projectInfo.CurrentPhase.Finish).Sum(x => UnitConversion.Convert.FromWei(x.Amount, decimals));
+        if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
             ValidateWhiteList(userData, amount, investAmounts);
         }
         else
         {
-            ValidateFCFS(phase, amount, investAmounts);
+            ValidateFCFS(projectInfo.CurrentPhase, amount, investAmounts);
         }
 
         var signature = signatureGenerator.GenerateSignature(
-            new Eip712Domain(phase.ChainId, chainProvider.InvestedProviderContract(phase.ChainId)),
-            new InvestMessage(phase.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), phase.EndTime, userInvestments.Length)
+            new Eip712Domain(projectInfo.ChainId, chainProvider.InvestedProviderContract(projectInfo.ChainId)),
+            new InvestMessage(projectInfo.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
         );
 
-        return Task.FromResult(new GenerateSignatureResponse(signature, phase.EndTime));
+        return Task.FromResult(new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value));
     }
 
-    private static void ValidateFCFS(ProjectPhase phase, decimal amount, decimal investSum)
+    private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
     {
         if (phase.MaxInvest > amount)
         {

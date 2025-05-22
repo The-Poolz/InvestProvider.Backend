@@ -7,7 +7,7 @@ namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 public class GenerateSignatureRequest : IRequest<GenerateSignatureResponse>
 {
     [JsonRequired]
-    public string PhaseId { get; set; } = null!;
+    public string ProjectId { get; set; } = null!;
 
     [JsonRequired]
     public EthereumAddress UserAddress { get; set; } = null!;

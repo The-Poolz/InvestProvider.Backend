@@ -6,7 +6,7 @@ using EnvironmentManager.Extensions;
 using Net.Utils.ErrorHandler.Extensions;
 using GraphQL.Client.Serializer.Newtonsoft;
 using InvestProvider.Backend.Services.Strapi.Models;
-using ProjectPhase = InvestProvider.Backend.Services.Strapi.Models.ProjectPhase;
+using ProjectInfo = InvestProvider.Backend.Services.Strapi.Models.ProjectInfo;
 
 namespace InvestProvider.Backend.Services.Strapi;
 
@@ -41,11 +41,11 @@ public class StrapiClient : IStrapiClient
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }
 
-    public ProjectPhase ReceiveProjectPhase(string phaseId)
+    public ProjectInfo ReceiveProjectInfo(string phaseId)
     {
-        var response = SendQuery<ProjectPhaseResponse>(ProjectPhaseRequest.BuildRequest(phaseId), graphQlResponse =>
+        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(phaseId), graphQlResponse =>
         {
-            if (graphQlResponse.Data.ProjectPhase == null)
+            if (graphQlResponse.Data.ProjectsInfo == null)
             {
                 throw Error.PROJECT_PHASE_NOT_FOUND.ToException(new
                 {
@@ -54,7 +54,7 @@ public class StrapiClient : IStrapiClient
             }
         });
 
-        return new ProjectPhase(response.Data);
+        return new ProjectInfo(response.Data);
     }
 
     private GraphQLResponse<TResponse> SendQuery<TResponse>(GraphQLRequest request, Action<GraphQLResponse<TResponse>> notFoundHandlerFunc)

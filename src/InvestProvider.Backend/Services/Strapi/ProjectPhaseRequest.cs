@@ -5,30 +5,24 @@ namespace InvestProvider.Backend.Services.Strapi;
 
 public static class ProjectPhaseRequest
 {
-    public static GraphQLRequest BuildRequest(string phaseId)
+    public static GraphQLRequest BuildRequest(string projectId)
     {
-        var documentIdFilter = new GraphQlQueryParameter<string>("documentId", defaultValue: phaseId);
+        var documentIdFilter = new GraphQlQueryParameter<string>("documentId", defaultValue: projectId);
         var statusParam = new GraphQlQueryParameter<PublicationStatus?>("status", "PublicationStatus", PublicationStatus.Published);
 
         var queryBuilder = new QueryQueryBuilder()
-            .WithProjectPhase(new ProjectPhaseQueryBuilder()
-                .WithStartTime()
-                .WithEndTime()
-                .WithMaxInvest()
-                .WithProjectsInformation(new ProjectsInformationQueryBuilder()
-                    .WithPoolzBackId()
-                    .WithUploadPool(new ComponentUploadPoolUploadPoolQueryBuilder()
-                        .WithBuyWith(new BuyWithQueryBuilder()
-                            .WithChainAddresses(new ComponentChainAddressesChainAddressesQueryBuilder()
-                                .WithAddress()
-                            )
-                        )
+            .WithProjectsInformation(new ProjectsInformationQueryBuilder()
+                .WithPoolzBackId()
+                .WithChainSetting(new ChainSettingQueryBuilder()
+                    .WithChain(new ChainQueryBuilder()
+                        .WithChainId()
                     )
-                    .WithChainSetting(new ChainSettingQueryBuilder()
-                        .WithChain(new ChainQueryBuilder()
-                            .WithChainId()
-                        )
-                    )
+                )
+                .WithProjectPhases(new ComponentPhaseStartEndAmountQueryBuilder()
+                    .WithId()
+                    .WithStart()
+                    .WithFinish()
+                    .WithMaxInvest()
                 ),
                 documentId: documentIdFilter,
                 status: statusParam
