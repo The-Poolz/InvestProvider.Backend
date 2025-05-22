@@ -9,7 +9,7 @@ public sealed class Eip712Domain : Domain
 {
     public Eip712Domain(long chainId, EthereumAddress verifyingContract)
     {
-        Name = "DispenserProvider";
+        Name = "InvestProvider";
         Version = "1";
         ChainId = chainId;
         VerifyingContract = verifyingContract;

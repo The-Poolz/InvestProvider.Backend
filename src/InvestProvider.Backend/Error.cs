@@ -19,5 +19,13 @@ public enum Error
     [Error("Phase inactive.")]
     PHASE_INACTIVE,
     [Error("User for selected phase not found.")]
-    USER_NOT_FOUND
+    USER_NOT_FOUND,
+    [Error("Amount exceed the max invest amount.")]
+    AMOUNT_EXCEED_MAX_INVEST,
+    [Error("User already invested.")]
+    ALREADY_INVESTED,
+    [Error("User not in white list.")]
+    NOT_IN_WHITE_LIST,
+    [Error("Amount exceed the white list amount.")]
+    AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT
 }

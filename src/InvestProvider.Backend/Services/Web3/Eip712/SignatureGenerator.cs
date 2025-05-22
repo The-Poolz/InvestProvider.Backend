@@ -3,7 +3,7 @@ using InvestProvider.Backend.Services.Web3.Eip712.Models;
 
 namespace InvestProvider.Backend.Services.Web3.Eip712;
 
-public class SignatureGenerator(ISignerManager signerManager, IChainProvider chainProvider) : ISignatureGenerator
+public class SignatureGenerator(ISignerManager signerManager) : ISignatureGenerator
 {
     public string GenerateSignature(Eip712Domain domain, InvestMessage investMessage)
     {

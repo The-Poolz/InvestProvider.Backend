@@ -7,12 +7,12 @@ using Net.Cache.DynamoDb.ERC20.Models;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
+using InvestProvider.Backend.Services.Web3.Eip712;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
-using InvestProvider.Backend.Services.Web3.Eip712;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
+using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
@@ -79,24 +79,21 @@ public class GenerateSignatureHandler(
             new InvestMessage(phase.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), phase.EndTime, userInvestments.Length)
         );
 
-        return Task.FromResult(new GenerateSignatureResponse()
-        {
-            Signature = signature,
-            ValidUntil = phase.EndTime
-        });
-
-        //return $"{poolId} {Address} {currentPhase.End} {Value} {userInvests.Count()}";
+        return Task.FromResult(new GenerateSignatureResponse(signature, phase.EndTime));
     }
 
     private static void ValidateFCFS(ProjectPhase phase, decimal amount, decimal investSum)
     {
         if (phase.MaxInvest > amount)
         {
-            throw new InvalidOperationException($"Value exceed the MaxInvest = {phase.MaxInvest}");
+            throw Error.AMOUNT_EXCEED_MAX_INVEST.ToException(new
+            {
+                phase.MaxInvest
+            });
         }
         if (investSum > 0)
         {
-            throw new InvalidOperationException("Already Invested");
+            throw Error.ALREADY_INVESTED.ToException();
         }
     }
 
@@ -104,11 +101,16 @@ public class GenerateSignatureHandler(
     {
         if (userData == null)
         {
-            throw new InvalidOperationException("User not in WhiteList");
+            throw Error.NOT_IN_WHITE_LIST.ToException();
         }
         if (userData.Amount < amount + investSum)
         {
-            throw new InvalidOperationException($"Value exceed the Amount {amount} {investSum} {userData.Amount}");
+            throw Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT.ToException(new
+            {
+                UserAmount = amount,
+                MaxInvestAmount = userData.Amount,
+                InvestSum = investSum
+            });
         }
     }
 }

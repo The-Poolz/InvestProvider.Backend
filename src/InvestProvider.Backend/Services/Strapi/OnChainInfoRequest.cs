@@ -52,11 +52,9 @@ public static class OnChainInfoRequest
             .WithParameter(chainFilter)
             .WithParameter(statusParam);
 
-        var query = queryBuilder.Build();
-
         return new GraphQLRequest
         {
-            Query = query
+            Query = queryBuilder.Build()
         };
     }
 }
