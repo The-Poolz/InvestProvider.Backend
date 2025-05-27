@@ -4,24 +4,29 @@ using Nethereum.Util;
 using System.Numerics;
 using Net.Cache.DynamoDb.ERC20;
 using Poolz.Finance.CSharp.Strapi;
+using NethereumGenerators.Interfaces;
 using Net.Cache.DynamoDb.ERC20.Models;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
+using poolz.finance.csharp.contracts.LockDealNFT;
 using InvestProvider.Backend.Services.Web3.Eip712;
+using poolz.finance.csharp.contracts.InvestProvider;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
+using InvestProvider.Backend.Services.Web3.Contracts.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
 public class GenerateSignatureHandler(
     IStrapiClient strapi,
-    IInvestProviderContract investProvider,
-    ILockDealNFTContract lockDealNFT,
+    IInvestProviderService<ContractType> investProvider,
+    IChainProvider<ContractType> chainProvider,
+    ILockDealNFTService<ContractType> lockDealNFT,
     ERC20CacheProvider erc20Cache,
-    IChainProvider chainProvider,
+    IRpcProvider rpcProvider,
     CacheProvider<string, UserData> userProvider,
     ISignatureGenerator signatureGenerator
 )
@@ -29,7 +34,7 @@ public class GenerateSignatureHandler(
 {
     public const byte MinInvestAmount = 1;
 
-    public Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
+    public async Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
     {
         var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
         if (projectInfo.CurrentPhase == null)
@@ -40,11 +45,11 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var tokenAddress = lockDealNFT.TokenOf(projectInfo.ChainId, projectInfo.PoolId);
+        var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, projectInfo.PoolId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(
             projectInfo.ChainId,
             tokenAddress,
-            chainProvider.RpcUrl(projectInfo.ChainId)
+            rpcProvider.RpcUrl(projectInfo.ChainId)
         )).Decimals;
 
         var amount = UnitConversion.Convert.FromWei(BigInteger.Parse(request.WeiAmount), decimals);
@@ -61,8 +66,13 @@ public class GenerateSignatureHandler(
         {
             throw Error.USER_NOT_FOUND.ToException();
         }
-        var userInvestments = investProvider.GetUserInvests(projectInfo.ChainId, projectInfo.PoolId, request.UserAddress).ToArray();
-        var investAmounts = userInvestments.Where(x => x.BlockCreation >= projectInfo.CurrentPhase.Start && x.BlockCreation < projectInfo.CurrentPhase.Finish).Sum(x => UnitConversion.Convert.FromWei(x.Amount, decimals));
+        var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, projectInfo.PoolId, request.UserAddress);
+        var userInvestments = userInvestmentsResponse.ReturnValue1.Select(x => new UserInvestments(x)).ToArray();
+
+        var investAmounts = userInvestments
+            .Where(x => x.BlockCreation >= projectInfo.CurrentPhase.Start && x.BlockCreation < projectInfo.CurrentPhase.Finish)
+            .Sum(x => UnitConversion.Convert.FromWei(x.Amount, decimals));
+
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
             ValidateWhiteList(userData, amount, investAmounts);
@@ -73,11 +83,11 @@ public class GenerateSignatureHandler(
         }
 
         var signature = signatureGenerator.GenerateSignature(
-            new Eip712Domain(projectInfo.ChainId, chainProvider.InvestedProviderContract(projectInfo.ChainId)),
+            new Eip712Domain(projectInfo.ChainId, chainProvider.ContractAddress(projectInfo.ChainId, ContractType.InvestedProvider)),
             new InvestMessage(projectInfo.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
         );
 
-        return Task.FromResult(new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value));
+        return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value);
     }
 
     private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
