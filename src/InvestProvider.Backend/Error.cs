@@ -4,6 +4,8 @@ namespace InvestProvider.Backend;
 
 public enum Error
 {
+    [Error("Passed contract type not supported.")]
+    CONTRACT_TYPE_NOT_SUPPORTED,
     [Error("ChainId not supported.")]
     CHAIN_NOT_SUPPORTED,
     [Error("No one implemented request found.")]
