@@ -1,0 +1,9 @@
+﻿namespace InvestProvider.Backend;
+
+public enum Env
+{
+    STRAPI_GRAPHQL_URL,
+    SECRET_ID_OF_SIGN_ACCOUNT,
+    SECRET_KEY_OF_SIGN_ACCOUNT,
+    PRIVATE_KEY_OF_LOCAL_SIGN_ACCOUNT
+}
