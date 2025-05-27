@@ -1,4 +1,5 @@
 ﻿using Net.Cache;
+using SecretsManager;
 using Net.Cache.DynamoDb;
 using Net.Cache.DynamoDb.ERC20;
 using NethereumGenerators.Interfaces;
@@ -32,6 +33,7 @@ public static class DefaultServiceProvider
             .AddScoped<ILockDealNFTService<ContractType>, LockDealNFTService<ContractType>>()
             .AddScoped<IStrapiClient, StrapiClient>()
             .AddScoped<ERC20CacheProvider>()
+            .AddScoped<SecretManager>()
             .AddScoped<CacheProvider<string, UserData>>(_ => new CacheProvider<string, UserData>(new DynamoDbStorageProvider<string, UserData>()));
         return services.BuildServiceProvider();
     }
