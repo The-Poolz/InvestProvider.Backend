@@ -6,9 +6,9 @@ namespace InvestProvider.Backend.Services.DynamoDb.Models;
 public class UserData
 {
     [DynamoDBHashKey]
-    public string PhaseId { get; set; }
+    public string PhaseId { get; set; } = null!;
 
-    public string UserAddress { get; set; }
+    public string UserAddress { get; set; } = null!;
 
     public decimal Amount { get; set; }
 }
