@@ -24,6 +24,7 @@ public static class DefaultServiceProvider
             .AddScoped<ISignerManager, EnvSignerManager>()
 #else
             .AddScoped<ISignerManager, SignerManager>()
+            .AddScoped<SecretManager>()
 #endif
             .AddHandlers()
             .AddScoped<ISignatureGenerator, SignatureGenerator>()
@@ -33,7 +34,6 @@ public static class DefaultServiceProvider
             .AddScoped<ILockDealNFTService<ContractType>, LockDealNFTService<ContractType>>()
             .AddScoped<IStrapiClient, StrapiClient>()
             .AddScoped<ERC20CacheProvider>()
-            .AddScoped<SecretManager>()
             .AddScoped<CacheProvider<string, UserData>>(_ => new CacheProvider<string, UserData>(new DynamoDbStorageProvider<string, UserData>()));
         return services.BuildServiceProvider();
     }
