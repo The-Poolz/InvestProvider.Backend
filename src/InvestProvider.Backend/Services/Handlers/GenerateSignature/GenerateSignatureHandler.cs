@@ -1,8 +1,8 @@
 ﻿using MediatR;
-using Net.Cache;
 using Nethereum.Util;
 using System.Numerics;
 using Net.Cache.DynamoDb.ERC20;
+using Amazon.DynamoDBv2.DataModel;
 using Poolz.Finance.CSharp.Strapi;
 using NethereumGenerators.Interfaces;
 using Net.Cache.DynamoDb.ERC20.Models;
@@ -27,7 +27,7 @@ public class GenerateSignatureHandler(
     ILockDealNFTService<ContractType> lockDealNFT,
     ERC20CacheProvider erc20Cache,
     IRpcProvider rpcProvider,
-    CacheProvider<string, UserData> userProvider,
+    IDynamoDBContext dynamoDb,
     ISignatureGenerator signatureGenerator
 )
     : IRequestHandler<GenerateSignatureRequest, GenerateSignatureResponse>
@@ -62,10 +62,6 @@ public class GenerateSignatureHandler(
             });
         }
 
-        if (userProvider.TryGet(projectInfo.CurrentPhase.Id, out var userData))
-        {
-            throw Error.USER_NOT_FOUND.ToException();
-        }
         var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, projectInfo.PoolId, request.UserAddress);
         var userInvestments = userInvestmentsResponse.ReturnValue1.Select(x => new UserInvestments(x)).ToArray();
 
@@ -75,6 +71,11 @@ public class GenerateSignatureHandler(
 
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
+            var userData = await dynamoDb.LoadAsync<UserData>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+            if (userData == null)
+            {
+                throw Error.USER_NOT_FOUND.ToException();
+            }
             ValidateWhiteList(userData, amount, investAmounts);
         }
         else
