@@ -5,7 +5,7 @@ using Nethereum.ABI.FunctionEncoding.Attributes;
 
 namespace InvestProvider.Backend.Services.Web3.Eip712.Models;
 
-[Struct(name: "MessageStruct")]
+[Struct(name: "InvestMessage")]
 public class InvestMessage(long poolId, EthereumAddress userAddress, BigInteger amount, DateTime validUntil, BigInteger nonce)
 {
     [Parameter(type: "uint256", name: "poolId", order: 1)]
