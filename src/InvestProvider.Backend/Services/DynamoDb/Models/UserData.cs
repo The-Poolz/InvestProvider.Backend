@@ -5,10 +5,12 @@ namespace InvestProvider.Backend.Services.DynamoDb.Models;
 [DynamoDBTable("InvestProvider.Userdata")]
 public class UserData
 {
-    [DynamoDBHashKey]
+    [DynamoDBHashKey("PhaseId")]
     public string PhaseId { get; set; } = null!;
 
+    [DynamoDBRangeKey("UserAddress")]
     public string UserAddress { get; set; } = null!;
 
+    [DynamoDBProperty("Amount")]
     public decimal Amount { get; set; }
 }
