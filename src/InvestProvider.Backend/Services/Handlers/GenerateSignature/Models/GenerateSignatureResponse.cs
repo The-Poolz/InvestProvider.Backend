@@ -8,5 +8,5 @@ public class GenerateSignatureResponse(string signature, DateTime validUntil)
     public string Signature { get; set; } = signature;
 
     [JsonRequired]
-    public DateTime ValidUntil { get; set; } = validUntil;
+    public long ValidUntil { get; set; } = new DateTimeOffset(validUntil).ToUnixTimeSeconds();
 }
