@@ -2,7 +2,7 @@
 
 namespace InvestProvider.Backend.Services.DynamoDb.Models;
 
-[DynamoDBTable("InvestProvider.Userdata")]
+[DynamoDBTable("Strapi.ProjectsInformation")]
 public class ProjectsInformation
 {
     [DynamoDBHashKey("ProjectId")]
