@@ -22,7 +22,7 @@ public static class DefaultServiceProvider
             .AddScoped<ISignerManager, EnvSignerManager>()
 #else
             .AddScoped<ISignerManager, SignerManager>()
-            .AddScoped<SecretManager>()
+            .AddScoped<SecretsManager.SecretManager>()
 #endif
             .AddHandlers()
             .AddScoped<ISignatureGenerator, SignatureGenerator>()
