@@ -91,7 +91,7 @@ public class GenerateSignatureHandler(
             new InvestMessage(dynamoProjectInfo.PoolzBackId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
         );
 
-        return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value);
+        return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value, dynamoProjectInfo.PoolzBackId);
     }
 
     private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
