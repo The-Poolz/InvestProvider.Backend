@@ -46,7 +46,7 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
 
         var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, dynamoProjectInfo.PoolzBackId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(
