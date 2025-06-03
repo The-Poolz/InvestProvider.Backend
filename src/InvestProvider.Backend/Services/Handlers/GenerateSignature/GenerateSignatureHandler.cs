@@ -17,6 +17,7 @@ using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
 using InvestProvider.Backend.Services.Web3.Contracts.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
+using ProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
@@ -45,7 +46,9 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, projectInfo.PoolId);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+
+        var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, dynamoProjectInfo.PoolzBackId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(
             projectInfo.ChainId,
             tokenAddress,
@@ -62,7 +65,7 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, projectInfo.PoolId, request.UserAddress);
+        var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, dynamoProjectInfo.PoolzBackId, request.UserAddress);
         var userInvestments = userInvestmentsResponse.ReturnValue1.Select(x => new UserInvestments(x)).ToArray();
 
         var investAmounts = userInvestments
@@ -85,7 +88,7 @@ public class GenerateSignatureHandler(
 
         var signature = signatureGenerator.GenerateSignature(
             new Eip712Domain(projectInfo.ChainId, chainProvider.ContractAddress(projectInfo.ChainId, ContractType.InvestedProvider)),
-            new InvestMessage(projectInfo.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
+            new InvestMessage(dynamoProjectInfo.PoolzBackId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
         );
 
         return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value);
