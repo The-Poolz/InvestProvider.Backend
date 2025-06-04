@@ -47,6 +47,13 @@ public class GenerateSignatureHandler(
         }
 
         var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+        if (dynamoProjectInfo == null)
+        {
+            throw Error.POOLZ_BACK_ID_NOT_FOUND.ToException(new
+            {
+                request.ProjectId
+            });
+        }
 
         var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, dynamoProjectInfo.PoolzBackId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(

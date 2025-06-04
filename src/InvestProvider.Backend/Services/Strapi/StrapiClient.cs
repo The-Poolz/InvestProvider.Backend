@@ -41,15 +41,15 @@ public class StrapiClient : IStrapiClient
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }
 
-    public ProjectInfo ReceiveProjectInfo(string phaseId)
+    public ProjectInfo ReceiveProjectInfo(string projectId)
     {
-        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(phaseId), graphQlResponse =>
+        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId), graphQlResponse =>
         {
             if (graphQlResponse.Data.ProjectsInfo == null)
             {
                 throw Error.PROJECT_PHASE_NOT_FOUND.ToException(new
                 {
-                    PhaseId = phaseId
+                    ProjectId = projectId
                 });
             }
         });
