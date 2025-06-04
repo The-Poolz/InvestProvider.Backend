@@ -81,12 +81,9 @@ public class GenerateSignatureHandler(
 
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
-            var userData = await dynamoDb.LoadAsync<UserData>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
-            if (userData == null)
-            {
-                throw Error.USER_NOT_FOUND.ToException();
-            }
-            ValidateWhiteList(userData, amount, investAmounts);
+            var whiteList = await dynamoDb.LoadAsync<WhiteList>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+            if (whiteList == null) throw Error.USER_NOT_FOUND.ToException();
+            ValidateWhiteList(whiteList, amount, investAmounts);
         }
         else
         {
@@ -116,7 +113,7 @@ public class GenerateSignatureHandler(
         }
     }
 
-    private static void ValidateWhiteList(UserData userData, decimal amount, decimal investSum)
+    private static void ValidateWhiteList(WhiteList userData, decimal amount, decimal investSum)
     {
         if (userData == null)
         {

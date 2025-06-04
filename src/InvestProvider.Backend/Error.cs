@@ -35,5 +35,7 @@ public enum Error
     [Error("Selected phase not found in selected project.")]
     PHASE_IN_PROJECT_NOT_FOUND,
     [Error("Selected phase is not whitelist phase.")]
-    PHASE_IS_NOT_WHITELIST
+    PHASE_IS_NOT_WHITELIST,
+    [Error("Selected phase already finished.")]
+    PHASE_FINISHED
 }
