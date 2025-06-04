@@ -39,6 +39,8 @@ public class AdminWriteAllocationHandler(
         }
         if (phase.MaxInvest != 0) throw Error.PHASE_IS_NOT_WHITELIST.ToException();
 
+        // TODO: Check if not already finished
+
         await Parallel.ForEachAsync(request.ToSave.Chunk(BatchSize), new ParallelOptions 
             {
                 MaxDegreeOfParallelism = MaxParallel,
