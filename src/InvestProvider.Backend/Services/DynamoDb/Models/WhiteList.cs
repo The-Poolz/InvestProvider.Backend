@@ -1,5 +1,4 @@
-﻿using Nethereum.Util;
-using Net.Web3.EthereumWallet;
+﻿using Net.Web3.EthereumWallet;
 using Amazon.DynamoDBv2.DataModel;
 
 namespace InvestProvider.Backend.Services.DynamoDb.Models;
@@ -10,7 +9,7 @@ public class WhiteList(string projectId, DateTime start, EthereumAddress userAdd
     public WhiteList() : this(string.Empty, DateTime.UnixEpoch, EthereumAddress.ZeroAddress, decimal.Zero) { }
 
     [DynamoDBHashKey("HashId")]
-    public string HashId { get; set; } = $"{projectId}-{start.ToUnixTimestamp()}";
+    public string HashId { get; set; } = $"{projectId}-{start:O}";
 
     [DynamoDBRangeKey("UserAddress")]
     public string UserAddress { get; set; } = userAddress;
