@@ -1,0 +1,12 @@
+{
+   "AdminWriteAllocation":{
+      "ProjectId":"gs8h2f1lhjet7agtfx2ghdw9",
+      "PhaseId":"554",
+      "Users":[
+         {
+            "UserAddress":"0x0000000000000000000000000000000000000000",
+            "Amount":123.321
+         }
+      ]
+   }
+}
