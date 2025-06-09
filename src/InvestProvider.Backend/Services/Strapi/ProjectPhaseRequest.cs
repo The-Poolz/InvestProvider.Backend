@@ -12,7 +12,6 @@ public static class ProjectPhaseRequest
 
         var queryBuilder = new QueryQueryBuilder()
             .WithProjectsInformation(new ProjectsInformationQueryBuilder()
-                .WithPoolzBackId()
                 .WithChainSetting(new ChainSettingQueryBuilder()
                     .WithChain(new ChainQueryBuilder()
                         .WithChainId()

@@ -17,6 +17,7 @@ using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
 using InvestProvider.Backend.Services.Web3.Contracts.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
+using ProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
@@ -45,7 +46,16 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, projectInfo.PoolId);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+        if (dynamoProjectInfo == null)
+        {
+            throw Error.POOLZ_BACK_ID_NOT_FOUND.ToException(new
+            {
+                request.ProjectId
+            });
+        }
+
+        var tokenAddress = await lockDealNFT.TokenOfQueryAsync(projectInfo.ChainId, ContractType.LockDealNFT, dynamoProjectInfo.PoolzBackId);
         var decimals = erc20Cache.GetOrAdd(new GetCacheRequest(
             projectInfo.ChainId,
             tokenAddress,
@@ -62,7 +72,7 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, projectInfo.PoolId, request.UserAddress);
+        var userInvestmentsResponse = await investProvider.GetUserInvestsQueryAsync(projectInfo.ChainId, ContractType.InvestedProvider, dynamoProjectInfo.PoolzBackId, request.UserAddress);
         var userInvestments = userInvestmentsResponse.ReturnValue1.Select(x => new UserInvestments(x)).ToArray();
 
         var investAmounts = userInvestments
@@ -71,12 +81,9 @@ public class GenerateSignatureHandler(
 
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
-            var userData = await dynamoDb.LoadAsync<UserData>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
-            if (userData == null)
-            {
-                throw Error.USER_NOT_FOUND.ToException();
-            }
-            ValidateWhiteList(userData, amount, investAmounts);
+            var whiteList = await dynamoDb.LoadAsync<WhiteList>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+            if (whiteList == null) throw Error.USER_NOT_FOUND.ToException();
+            ValidateWhiteList(whiteList, amount, investAmounts);
         }
         else
         {
@@ -85,10 +92,10 @@ public class GenerateSignatureHandler(
 
         var signature = signatureGenerator.GenerateSignature(
             new Eip712Domain(projectInfo.ChainId, chainProvider.ContractAddress(projectInfo.ChainId, ContractType.InvestedProvider)),
-            new InvestMessage(projectInfo.PoolId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
+            new InvestMessage(dynamoProjectInfo.PoolzBackId, request.UserAddress, UnitConversion.Convert.ToWei(amount, decimals), projectInfo.CurrentPhase.Finish!.Value, userInvestments.Length)
         );
 
-        return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value);
+        return new GenerateSignatureResponse(signature, projectInfo.CurrentPhase.Finish!.Value, dynamoProjectInfo.PoolzBackId);
     }
 
     private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
@@ -106,7 +113,7 @@ public class GenerateSignatureHandler(
         }
     }
 
-    private static void ValidateWhiteList(UserData userData, decimal amount, decimal investSum)
+    private static void ValidateWhiteList(WhiteList userData, decimal amount, decimal investSum)
     {
         if (userData == null)
         {

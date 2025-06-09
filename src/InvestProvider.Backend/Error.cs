@@ -16,7 +16,7 @@ public enum Error
     LOCK_DEAL_NFT_NOT_SUPPORTED,
     [Error("Invest amount must be greater.")]
     INVEST_AMOUNT_IS_LESS_THAN_ALLOWED,
-    [Error("Project phase not found.")]
+    [Error("Phase by passed projectId, not found.")]
     PROJECT_PHASE_NOT_FOUND,
     [Error("Active phase by provided project, not found.")]
     NOT_FOUND_ACTIVE_PHASE,
@@ -29,5 +29,13 @@ public enum Error
     [Error("User not in white list.")]
     NOT_IN_WHITE_LIST,
     [Error("Amount exceed the white list amount.")]
-    AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT
+    AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT,
+    [Error("PoolzBackId for passed projectId, not found.")]
+    POOLZ_BACK_ID_NOT_FOUND,
+    [Error("Selected phase not found in selected project.")]
+    PHASE_IN_PROJECT_NOT_FOUND,
+    [Error("Selected phase is not whitelist phase.")]
+    PHASE_IS_NOT_WHITELIST,
+    [Error("Selected phase already finished.")]
+    PHASE_FINISHED
 }
