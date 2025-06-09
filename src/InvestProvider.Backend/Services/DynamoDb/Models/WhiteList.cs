@@ -9,11 +9,13 @@ public class WhiteList(string projectId, DateTime start, EthereumAddress userAdd
     public WhiteList() : this(string.Empty, DateTime.UnixEpoch, EthereumAddress.ZeroAddress, decimal.Zero) { }
 
     [DynamoDBHashKey("HashId")]
-    public string HashId { get; set; } = $"{projectId}-{start:O}";
+    public string HashId { get; set; } = CalculateHashId(projectId, start);
 
     [DynamoDBRangeKey("UserAddress")]
     public string UserAddress { get; set; } = userAddress;
 
     [DynamoDBProperty("Amount")]
     public decimal Amount { get; set; } = amount;
+
+    public static string CalculateHashId(string projectId, DateTime start) => $"{projectId}-{start:O}";
 }

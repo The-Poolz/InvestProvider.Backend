@@ -3,8 +3,9 @@ using Newtonsoft.Json;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminGetAllocation.Models;
 
-public class AdminGetAllocationRequest : IRequest<AdminGetAllocationResponse>
+[method: JsonConstructor]
+public class AdminGetAllocationRequest(string projectId) : IRequest<AdminGetAllocationResponse>
 {
     [JsonRequired]
-    public string ProjectId { get; set; } = null!;
+    public string ProjectId { get; } = projectId;
 }
