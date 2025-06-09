@@ -7,10 +7,7 @@ using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 
-public class AdminWriteAllocationHandler(
-    IDynamoDBContext dynamoDb,
-    IStrapiClient strapi
-)
+public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb, IStrapiClient strapi)
     : IRequestHandler<AdminWriteAllocationRequest, AdminWriteAllocationResponse>
 {
     private const int BatchSize = 25;

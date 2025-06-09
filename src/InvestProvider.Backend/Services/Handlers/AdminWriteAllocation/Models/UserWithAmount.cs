@@ -1,12 +1,16 @@
 ﻿using Newtonsoft.Json;
+using Net.Web3.EthereumWallet;
+using Net.Web3.EthereumWallet.Json.Converters;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
-public class UserWithAmount
+[method: JsonConstructor]
+public class UserWithAmount(EthereumAddress userAddress, decimal amount)
 {
     [JsonRequired]
-    public string UserAddress { get; set; } = null!;
+    [JsonConverter(typeof(EthereumAddressConverter))]
+    public EthereumAddress UserAddress { get; } = userAddress;
 
     [JsonRequired]
-    public decimal Amount { get; set; }
+    public decimal Amount { get; } = amount;
 }
