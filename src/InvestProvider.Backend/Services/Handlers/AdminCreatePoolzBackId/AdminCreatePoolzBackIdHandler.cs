@@ -21,8 +21,8 @@ public class AdminCreatePoolzBackIdHandler(
 
         var getFullData = await lockDealNFT.GetFullDataQueryAsync(request.ChainId, ContractType.LockDealNFT, request.PoolzBackId);
         if (getFullData.PoolInfo.Count != 2 ||
-            getFullData.PoolInfo[0].Name != StrapiClient.NameOfInvestedProvider ||
-            getFullData.PoolInfo[1].Name != StrapiClient.NameOfDispenserProvider
+            getFullData.PoolInfo[0].Name != ContractNames.InvestProvider ||
+            getFullData.PoolInfo[1].Name != ContractNames.DispenserProvider
         ) throw Error.INVALID_POOL_TYPE.ToException();
 
         await dynamoDb.SaveAsync(request, cancellationToken);

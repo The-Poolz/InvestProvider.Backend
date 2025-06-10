@@ -1,5 +1,6 @@
 ﻿using GraphQL;
 using Poolz.Finance.CSharp.Strapi;
+using InvestProvider.Backend.Services.Web3.Contracts;
 
 namespace InvestProvider.Backend.Services.Strapi;
 
@@ -15,14 +16,14 @@ public static class OnChainInfoRequest
                 {
                     ContractVersion = new ContractFiltersInput
                     {
-                        NameVersion = new StringFilterInput { Contains = StrapiClient.NameOfInvestedProvider }
+                        NameVersion = new StringFilterInput { Contains = ContractNames.InvestProvider }
                     }
                 },
                 new ComponentContractOnChainContractOnChainFiltersInput
                 {
                     ContractVersion = new ContractFiltersInput
                     {
-                        NameVersion = new StringFilterInput { Contains = StrapiClient.NameOfLockDealNFT }
+                        NameVersion = new StringFilterInput { Contains = ContractNames.LockDealNFT }
                     }
                 }
             }
