@@ -1,0 +1,87 @@
+name: Deploy Lambda Function
+
+on:
+  release:
+    types: [published]
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_ACTOR: ${{ github.actor }}
+
+permissions:
+  id-token: write
+  contents: read
+  packages: read
+
+jobs:
+  deploy:
+    if: ${{ github.event.release.target_commitish == 'master' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build project
+        run: dotnet build --configuration Release
+
+      - name: Install Amazon Lambda Tools
+        run: dotnet tool install -g Amazon.Lambda.Tools
+      
+      - name: Package Lambda function
+        working-directory: ${{ github.workspace }}/src/InvestProvider.Backend
+        run: dotnet lambda package --configuration Release --output-package ../deployment.zip
+
+
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: lambda-deployment
+          path: src/deployment.zip
+
+      - name: Download deployment artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: lambda-deployment
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ROLE_TO_ASSUME }}
+          role-session-name: GitHub_to_AWS_via_FederatedOIDC
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+
+      - name: Deploy Lambda Code
+        run: |
+          aws lambda update-function-code --function-name InvestProvider --zip-file fileb://deployment.zip > /dev/null 2>&1
+
+      - name: Wait for Lambda update to complete
+        run: |
+          echo "Waiting for Lambda function update to complete..."
+          attempt=0
+          max_attempts=30
+          while true; do
+            status=$(aws lambda get-function-configuration --function-name InvestProvider --query 'LastUpdateStatus' --output text)
+            echo "Current status: $status"
+            if [ "$status" != "InProgress" ]; then
+              if [ "$status" = "Successful" ]; then
+                echo "Lambda function update completed successfully."
+                break
+              else
+                echo "Lambda function update finished with status: $status"
+                exit 1
+              fi
+            fi
+            sleep 1
+            attempt=$((attempt + 1))
+            if [ $attempt -ge $max_attempts ]; then
+              echo "Max attempts reached. Exiting."
+              exit 1
+            fi
+          done
+      
+      - name: Update Lambda Description with Release URL
+        env:
+          RELEASE_URL: ${{ github.event.release.html_url }}
+        run: |
+          aws lambda update-function-configuration --function-name InvestProvider --description "$RELEASE_URL" > /dev/null 2>&1
