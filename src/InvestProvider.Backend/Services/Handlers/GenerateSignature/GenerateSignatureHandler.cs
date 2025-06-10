@@ -81,7 +81,7 @@ public class GenerateSignatureHandler(
 
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
-            var whiteList = await dynamoDb.LoadAsync<WhiteList>(projectInfo.CurrentPhase.Id, request.UserAddress.Address, cancellationToken);
+            var whiteList = await dynamoDb.LoadAsync<WhiteList>(WhiteList.CalculateHashId(request.ProjectId, projectInfo.CurrentPhase.Start!.Value), request.UserAddress.Address, cancellationToken);
             if (whiteList == null) throw Error.USER_NOT_FOUND.ToException();
             ValidateWhiteList(whiteList, amount, investAmounts);
         }
