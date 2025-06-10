@@ -37,5 +37,7 @@ public enum Error
     [Error("Selected phase is not whitelist phase.")]
     PHASE_IS_NOT_WHITELIST,
     [Error("Selected phase already finished.")]
-    PHASE_FINISHED
+    PHASE_FINISHED,
+    [Error("Pool must be InvestProvider.")]
+    INVALID_POOL_TYPE
 }
