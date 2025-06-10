@@ -6,14 +6,13 @@ using EnvironmentManager.Extensions;
 using Net.Utils.ErrorHandler.Extensions;
 using GraphQL.Client.Serializer.Newtonsoft;
 using InvestProvider.Backend.Services.Strapi.Models;
+using InvestProvider.Backend.Services.Web3.Contracts;
 using ProjectInfo = InvestProvider.Backend.Services.Strapi.Models.ProjectInfo;
 
 namespace InvestProvider.Backend.Services.Strapi;
 
 public class StrapiClient : IStrapiClient
 {
-    public const string NameOfInvestedProvider = "InvestProvider";
-    public const string NameOfLockDealNFT = "LockDealNFT";
     public static readonly string ApiUrl = Env.STRAPI_GRAPHQL_URL.GetRequired<string>();
 
     private readonly GraphQLHttpClient _client = new(
@@ -35,8 +34,8 @@ public class StrapiClient : IStrapiClient
         });
 
         var chain = response.Data.Chains.First();
-        var investedProvider = ExtractAddress(chain, NameOfInvestedProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
-        var lockDealNFT = ExtractAddress(chain, NameOfLockDealNFT, Error.LOCK_DEAL_NFT_NOT_SUPPORTED);
+        var investedProvider = ExtractAddress(chain, ContractNames.InvestProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
+        var lockDealNFT = ExtractAddress(chain, ContractNames.LockDealNFT, Error.LOCK_DEAL_NFT_NOT_SUPPORTED);
 
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }
