@@ -19,12 +19,11 @@ public class AdminCreatePoolzBackIdHandler(
     {
         _ = strapi.ReceiveProjectInfo(request.ProjectId);
 
-        var getData = await lockDealNFT.GetDataQueryAsync(request.ChainId, ContractType.LockDealNFT, request.PoolzBackId);
-        if (getData.PoolInfo.Name != StrapiClient.NameOfInvestedProvider) throw Error.INVALID_POOL_TYPE.ToException(new
-        {
-            ExpectedName = StrapiClient.NameOfInvestedProvider,
-            ReceivedName = getData.PoolInfo.Name
-        });
+        var getFullData = await lockDealNFT.GetFullDataQueryAsync(request.ChainId, ContractType.LockDealNFT, request.PoolzBackId);
+        if (getFullData.PoolInfo.Count != 2 ||
+            getFullData.PoolInfo[0].Name != StrapiClient.NameOfInvestedProvider ||
+            getFullData.PoolInfo[1].Name != StrapiClient.NameOfDispenserProvider
+        ) throw Error.INVALID_POOL_TYPE.ToException();
 
         await dynamoDb.SaveAsync(request, cancellationToken);
 

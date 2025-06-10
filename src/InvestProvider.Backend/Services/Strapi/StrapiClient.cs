@@ -12,6 +12,7 @@ namespace InvestProvider.Backend.Services.Strapi;
 
 public class StrapiClient : IStrapiClient
 {
+    public const string NameOfDispenserProvider = "DispenserProvider";
     public const string NameOfInvestedProvider = "InvestProvider";
     public const string NameOfLockDealNFT = "LockDealNFT";
     public static readonly string ApiUrl = Env.STRAPI_GRAPHQL_URL.GetRequired<string>();
