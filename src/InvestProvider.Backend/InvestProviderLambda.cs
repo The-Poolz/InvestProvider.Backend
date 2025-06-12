@@ -21,7 +21,6 @@ public class InvestProviderLambda(IServiceProvider serviceProvider)
                 .GetRequiredService<IMediator>()
                 .Send(request.HandlerRequest);
             return new LambdaResponse(response);
-
         }
         catch (ValidationException ex)
         {
