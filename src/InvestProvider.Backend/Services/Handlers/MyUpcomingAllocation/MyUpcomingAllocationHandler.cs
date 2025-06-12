@@ -13,7 +13,7 @@ public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
     public async Task<ICollection<MyUpcomingAllocationResponse>> Handle(MyUpcomingAllocationRequest request, CancellationToken cancellationToken)
     {
         var table = dynamoDb.GetTargetTable<WhiteList>();
-        var scanDocument = await table.Query(new QueryOperationConfig 
+        var whiteListTask = table.Query(new QueryOperationConfig 
         {
             IndexName = "UserAddress-index",
             KeyExpression = new Expression
@@ -30,18 +30,16 @@ public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
             }
         }).GetRemainingAsync(cancellationToken);
 
-        var whiteList = scanDocument.Select(dynamoDb.FromDocument<WhiteList>);
+        var projectInfoTask = dynamoDb.BatchLoadAsync<ProjectsInformation>(request.ProjectIDs, cancellationToken);
 
-        var amountByProject = whiteList
+        await Task.WhenAll(whiteListTask, projectInfoTask);
+
+        var amountByProject = whiteListTask.Result
+            .Select(dynamoDb.FromDocument<WhiteList>)
             .GroupBy(w => w.HashId[..w.HashId.IndexOf('-')])
             .ToDictionary(g => g.Key, g => g.Sum(x => x.Amount));
 
-        var poolzBackIDs = await dynamoDb.BatchLoadAsync<ProjectsInformation>(
-            request.ProjectIDs,
-            cancellationToken
-        );
-
-        return poolzBackIDs.Select(p => new MyUpcomingAllocationResponse(
+        return projectInfoTask.Result.Select(p => new MyUpcomingAllocationResponse(
             p.ProjectId,
             p.PoolzBackId,
             amountByProject.GetValueOrDefault(p.ProjectId, 0m))
