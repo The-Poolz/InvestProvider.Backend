@@ -37,7 +37,7 @@ public class GenerateSignatureHandler(
 
     public async Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
     {
-        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
+        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
         if (projectInfo.CurrentPhase == null)
         {
             throw Error.NOT_FOUND_ACTIVE_PHASE.ToException(new

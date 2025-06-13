@@ -1,5 +1,6 @@
 ﻿using GraphQL;
 using GraphQL.Client.Http;
+using System.Net.Http.Headers;
 using Net.Web3.EthereumWallet;
 using Poolz.Finance.CSharp.Strapi;
 using EnvironmentManager.Extensions;
@@ -17,7 +18,19 @@ public class StrapiClient : IStrapiClient
 
     private readonly GraphQLHttpClient _client = new(
         new GraphQLHttpClientOptions { EndPoint = new Uri(ApiUrl) },
-        new NewtonsoftJsonSerializer()
+        new NewtonsoftJsonSerializer(),
+        new HttpClient
+        {
+            DefaultRequestHeaders =
+            {
+                CacheControl = new CacheControlHeaderValue
+                {
+                    NoCache = true,
+                    NoStore = true,
+                    MustRevalidate = true
+                }
+            }
+        }
     );
 
     public OnChainInfo ReceiveOnChainInfo(long chainId)
@@ -40,9 +53,9 @@ public class StrapiClient : IStrapiClient
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }
 
-    public ProjectInfo ReceiveProjectInfo(string projectId)
+    public ProjectInfo ReceiveProjectInfo(string projectId, bool filterPhases)
     {
-        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId), graphQlResponse =>
+        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId, filterPhases), graphQlResponse =>
         {
             if (graphQlResponse.Data.ProjectsInfo == null)
             {

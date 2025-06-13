@@ -5,5 +5,5 @@ namespace InvestProvider.Backend.Services.Strapi;
 public interface IStrapiClient
 {
     public OnChainInfo ReceiveOnChainInfo(long chainId);
-    public ProjectInfo ReceiveProjectInfo(string projectId);
+    public ProjectInfo ReceiveProjectInfo(string projectId, bool filterPhases);
 }
