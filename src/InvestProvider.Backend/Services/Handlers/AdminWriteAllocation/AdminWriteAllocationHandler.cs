@@ -1,10 +1,10 @@
 ﻿using MediatR;
 using Amazon.DynamoDBv2.DataModel;
 using Net.Utils.ErrorHandler.Extensions;
+using Net.Web3.EthereumWallet.Extensions;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
-using Net.Web3.EthereumWallet.Extensions;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 
