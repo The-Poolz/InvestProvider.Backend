@@ -62,8 +62,7 @@ public static class ProjectPhaseRequest
 
         return new GraphQLRequest
         {
-            Query = queryBuilder.Build(),
-            
+            Query = queryBuilder.Build()
         };
     }
 }
