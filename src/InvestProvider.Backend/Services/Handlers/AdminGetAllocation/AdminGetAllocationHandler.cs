@@ -15,7 +15,7 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
 
     public async Task<ICollection<AdminGetAllocationResponse>> Handle(AdminGetAllocationRequest request, CancellationToken cancellationToken)
     {
-        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
+        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
 
         var throttler = new SemaphoreSlim(MaxParallel);
         var whiteListPhases = projectInfo.Phases.Where(x => x.MaxInvest == 0);

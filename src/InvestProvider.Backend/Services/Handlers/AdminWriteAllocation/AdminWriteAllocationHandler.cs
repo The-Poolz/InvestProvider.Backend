@@ -21,7 +21,7 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb, IStrapiClien
             request.ProjectId
         });
 
-        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
+        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
         var phase = projectInfo.Phases.FirstOrDefault(x => x.Id == request.PhaseId);
         if (phase == null) throw Error.PHASE_IN_PROJECT_NOT_FOUND.ToException(new
         {

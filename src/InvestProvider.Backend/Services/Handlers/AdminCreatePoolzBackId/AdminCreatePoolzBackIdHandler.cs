@@ -17,7 +17,7 @@ public class AdminCreatePoolzBackIdHandler(
 {
     public async Task<AdminCreatePoolzBackIdResponse> Handle(AdminCreatePoolzBackIdRequest request, CancellationToken cancellationToken)
     {
-        _ = strapi.ReceiveProjectInfo(request.ProjectId);
+        _ = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
 
         var getFullData = await lockDealNFT.GetFullDataQueryAsync(request.ChainId, ContractType.LockDealNFT, request.PoolzBackId);
         if (getFullData.PoolInfo.Count != 2 ||

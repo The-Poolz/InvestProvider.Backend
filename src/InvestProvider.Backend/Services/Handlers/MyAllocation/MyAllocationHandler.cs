@@ -18,7 +18,7 @@ public class MyAllocationHandler(IStrapiClient strapi, IDynamoDBContext dynamoDb
             request.ProjectId
         });
 
-        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId);
+        var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
         if (projectInfo.CurrentPhase == null) throw Error.NOT_FOUND_ACTIVE_PHASE.ToException(new
         {
             request.ProjectId

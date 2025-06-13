@@ -5,25 +5,32 @@ namespace InvestProvider.Backend.Services.Strapi;
 
 public static class ProjectPhaseRequest
 {
-    public static GraphQLRequest BuildRequest(string projectId)
+    public static GraphQLRequest BuildRequest(string projectId, bool filterPhases)
     {
         var documentIdFilter = new GraphQlQueryParameter<string>("documentId", defaultValue: projectId);
         var statusParam = new GraphQlQueryParameter<PublicationStatus?>("status", "PublicationStatus", PublicationStatus.Published);
-        var phaseFilter = new GraphQlQueryParameter<ComponentPhaseStartEndAmountFiltersInput>("phaseFilter", new ComponentPhaseStartEndAmountFiltersInput
+        GraphQlQueryParameter<ComponentPhaseStartEndAmountFiltersInput>? phaseFilter = null;
+        GraphQlQueryParameter<IEnumerable<string>>? sortFilter = null;
+
+        if (filterPhases)
         {
-            And = new[]
+            phaseFilter = new GraphQlQueryParameter<ComponentPhaseStartEndAmountFiltersInput>("phaseFilter", new ComponentPhaseStartEndAmountFiltersInput
             {
-                new ComponentPhaseStartEndAmountFiltersInput
+                And = new[]
                 {
-                    Start = new DateTimeFilterInput { Lte = DateTime.UtcNow }
-                },
-                new ComponentPhaseStartEndAmountFiltersInput
-                {
-                    Finish = new DateTimeFilterInput { Gte = DateTime.UtcNow }
+                    new ComponentPhaseStartEndAmountFiltersInput
+                    {
+                        Start = new DateTimeFilterInput { Lte = DateTime.UtcNow }
+                    },
+                    new ComponentPhaseStartEndAmountFiltersInput
+                    {
+                        Finish = new DateTimeFilterInput { Gte = DateTime.UtcNow }
+                    }
                 }
-            }
-        });
-        var sortFilter = new GraphQlQueryParameter<IEnumerable<string>>("sortFilter", "[String]", ["Start"]);
+            });
+
+            sortFilter = new GraphQlQueryParameter<IEnumerable<string>>("sortFilter", "[String]", ["Start"]);
+        }
 
         var queryBuilder = new QueryQueryBuilder()
             .WithProjectsInformation(new ProjectsInformationQueryBuilder()
@@ -37,16 +44,21 @@ public static class ProjectPhaseRequest
                     .WithStart()
                     .WithFinish()
                     .WithMaxInvest(),
-                    filters: phaseFilter,
-                    sort: sortFilter
+                    filters: filterPhases ? phaseFilter : null,
+                    sort: filterPhases ? sortFilter : null
                 ),
                 documentId: documentIdFilter,
                 status: statusParam
             )
             .WithParameter(documentIdFilter)
-            .WithParameter(statusParam)
-            .WithParameter(phaseFilter)
-            .WithParameter(sortFilter);
+            .WithParameter(statusParam);
+
+        if (filterPhases)
+        {
+            queryBuilder
+                .WithParameter(phaseFilter)
+                .WithParameter(sortFilter);
+        }
 
         return new GraphQLRequest
         {
