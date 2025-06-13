@@ -1,23 +1,46 @@
 ﻿using FluentValidation;
+using Amazon.DynamoDBv2.DataModel;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
+using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
 public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSignatureRequest>
 {
-    public GenerateSignatureRequestValidator(IStrapiClient strapi)
+    public GenerateSignatureRequestValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
     {
-        RuleFor(r => r.ProjectId).NotEmpty();
+        RuleFor(x => x.ProjectId).NotNull().NotEmpty();
 
-        RuleFor(r => r).Custom((req, ctx) =>
+        RuleFor(x => x.WeiAmount).NotNull().NotEmpty();
+
+        //RuleFor(x => x)
+        //    .Must(request =>
+        //    {
+        //        request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
+
+        //        return request.StrapiProjectInfo.CurrentPhase is not null;
+        //    })
+        //    .WithError(Error.NOT_FOUND_ACTIVE_PHASE);
+
+        RuleFor(x => x).Custom((request, context) =>
         {
-            req.ProjectInfo = strapi.ReceiveProjectInfo(req.ProjectId, true);
+            request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, true);
 
-            if (req.ProjectInfo.CurrentPhase is null)
+            if (request.StrapiProjectInfo.CurrentPhase != null)
             {
-                ctx.AddFailure(Error.NOT_FOUND_ACTIVE_PHASE.ToErrorMessage());
+                context.AddFailure(Error.NOT_FOUND_ACTIVE_PHASE.ToErrorMessage());
+            }
+        });
+
+        RuleFor(x => x).CustomAsync(async (request, context, cancellationToken) =>
+        {
+            request.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+
+            if (request.DynamoDbProjectsInfo == null)
+            {
+                context.AddFailure(Error.POOLZ_BACK_ID_NOT_FOUND.ToErrorMessage());
             }
         });
     }

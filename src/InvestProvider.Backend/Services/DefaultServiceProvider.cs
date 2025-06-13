@@ -15,25 +15,23 @@ namespace InvestProvider.Backend.Services;
 
 public static class DefaultServiceProvider
 {
-    public static IServiceProvider Build()
-    {
-        var services = new ServiceCollection()
+    public static IServiceProvider Build() => new ServiceCollection()
 #if DEBUG
-            .AddScoped<ISignerManager, EnvSignerManager>()
+        .AddScoped<ISignerManager, EnvSignerManager>()
 #else
-            .AddScoped<ISignerManager, SignerManager>()
-            .AddScoped<SecretsManager.SecretManager>()
+        .AddScoped<ISignerManager, SignerManager>()
+        .AddScoped<SecretsManager.SecretManager>()
 #endif
-            .AddHandlers()
-            .AddScoped<ISignatureGenerator, SignatureGenerator>()
-            .AddScoped<IRpcProvider, ChainProvider>()
-            .AddScoped<IChainProvider<ContractType>, ChainProvider>()
-            .AddScoped<IInvestProviderService<ContractType>, InvestProviderService<ContractType>>()
-            .AddScoped<ILockDealNFTService<ContractType>, LockDealNFTService<ContractType>>()
-            .AddScoped<IStrapiClient, StrapiClient>()
-            .AddScoped<ERC20CacheProvider>()
-            .AddScoped<IDynamoDBContext, DynamoDBContext>()
-            .AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>();
-        return services.BuildServiceProvider();
-    }
+        .AddHandlers()
+        .AddValidators()
+        .AddScoped<ISignatureGenerator, SignatureGenerator>()
+        .AddScoped<IRpcProvider, ChainProvider>()
+        .AddScoped<IChainProvider<ContractType>, ChainProvider>()
+        .AddScoped<IInvestProviderService<ContractType>, InvestProviderService<ContractType>>()
+        .AddScoped<ILockDealNFTService<ContractType>, LockDealNFTService<ContractType>>()
+        .AddScoped<IStrapiClient, StrapiClient>()
+        .AddScoped<ERC20CacheProvider>()
+        .AddScoped<IDynamoDBContext, DynamoDBContext>()
+        .AddScoped<IAmazonDynamoDB, AmazonDynamoDBClient>()
+        .BuildServiceProvider();
 }
