@@ -15,33 +15,21 @@ public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSigna
 
         RuleFor(x => x.WeiAmount).NotNull().NotEmpty();
 
-        //RuleFor(x => x)
-        //    .Must(request =>
-        //    {
-        //        request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
-
-        //        return request.StrapiProjectInfo.CurrentPhase is not null;
-        //    })
-        //    .WithError(Error.NOT_FOUND_ACTIVE_PHASE);
-
-        RuleFor(x => x).Custom((request, context) =>
-        {
-            request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, true);
-
-            if (request.StrapiProjectInfo.CurrentPhase != null)
+        RuleFor(x => x)
+            .Must(request =>
             {
-                context.AddFailure(Error.NOT_FOUND_ACTIVE_PHASE.ToErrorMessage());
-            }
-        });
+                request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
+                return request.StrapiProjectInfo.CurrentPhase != null;
+            })
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE);
 
-        RuleFor(x => x).CustomAsync(async (request, context, cancellationToken) =>
-        {
-            request.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
-
-            if (request.DynamoDbProjectsInfo == null)
+        RuleFor(x => x)
+            .MustAsync(async (request, cancellationToken) =>
             {
-                context.AddFailure(Error.POOLZ_BACK_ID_NOT_FOUND.ToErrorMessage());
-            }
-        });
+                request.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+
+                return request.DynamoDbProjectsInfo != null;
+            })
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND);
     }
 }
