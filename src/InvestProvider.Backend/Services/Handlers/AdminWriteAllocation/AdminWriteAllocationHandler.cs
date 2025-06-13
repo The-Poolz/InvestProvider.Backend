@@ -4,6 +4,7 @@ using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
+using Net.Web3.EthereumWallet.Extensions;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 
@@ -31,7 +32,7 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb, IStrapiClien
         if (phase.MaxInvest != 0) throw Error.PHASE_IS_NOT_WHITELIST.ToException();
         if (DateTime.UtcNow >= phase.Finish) throw Error.PHASE_FINISHED.ToException();
 
-        var toSave = request.Users.Select(x => new WhiteList(request.ProjectId, phase.Start!.Value, x.UserAddress, x.Amount)).ToArray();
+        var toSave = request.Users.Select(x => new WhiteList(request.ProjectId, phase.Start!.Value, x.UserAddress.ConvertToChecksumAddress(), x.Amount)).ToArray();
         await Parallel.ForEachAsync(toSave.Chunk(BatchSize), new ParallelOptions 
             {
                 MaxDegreeOfParallelism = MaxParallel,
