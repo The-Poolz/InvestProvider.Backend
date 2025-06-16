@@ -20,8 +20,6 @@ public enum Error
     PROJECT_PHASE_NOT_FOUND,
     [Error("Active phase by provided project, not found.")]
     NOT_FOUND_ACTIVE_PHASE,
-    [Error("User for selected phase not found.")]
-    USER_NOT_FOUND,
     [Error("Amount exceed the max invest amount.")]
     AMOUNT_EXCEED_MAX_INVEST,
     [Error("User already invested.")]

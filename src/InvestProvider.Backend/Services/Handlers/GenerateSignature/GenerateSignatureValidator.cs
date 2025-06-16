@@ -10,7 +10,9 @@ public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSigna
         IValidator<IValidatedStrapiProjectInfo> strapiProjectInfoValidator,
         IValidator<IValidatedDynamoDbProjectInfo> dynamoDbProjectInfoValidator,
         IValidator<IValidatedInvestAmount> investAmountValidator,
-        IValidator<INotAlreadyInvestedAmount> alreadyInvestedValidator
+        IValidator<INotAlreadyInvestedAmount> alreadyInvestedValidator,
+        IValidator<IFcfsSignature> fcfsSignatureValidator,
+        IValidator<IWhiteListSignature> whiteListValidator
     )
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
@@ -30,5 +32,13 @@ public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSigna
 
         RuleFor(x => x)
             .SetValidator(alreadyInvestedValidator);
+
+        RuleFor(x => x)
+            .SetValidator(fcfsSignatureValidator)
+            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest != 0);
+
+        RuleFor(x => x)
+            .SetValidator(whiteListValidator)
+            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0);
     }
 }

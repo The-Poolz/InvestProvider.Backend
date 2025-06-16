@@ -24,16 +24,16 @@ public class AlreadyInvestedValidator : AbstractValidator<INotAlreadyInvestedAmo
                     x.UserAddress
                 );
 
-                var userInvestments = userInvestmentsResponse.ReturnValue1.Select(ui => new UserInvestments(ui)).ToArray();
+                x.UserInvestments = userInvestmentsResponse.ReturnValue1.Select(ui => new UserInvestments(ui)).ToArray();
 
-                var investAmounts = userInvestments
+                x.InvestedAmount = x.UserInvestments
                     .Where(ui =>
                         ui.BlockCreation >= x.StrapiProjectInfo.CurrentPhase!.Start &&
                         ui.BlockCreation < x.StrapiProjectInfo.CurrentPhase.Finish
                     )
                     .Sum(ui => UnitConversion.Convert.FromWei(ui.Amount, x.TokenDecimals));
 
-                return investAmounts == 0;
+                return x.InvestedAmount == 0;
             })
             .WithError(Error.ALREADY_INVESTED)
             .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest != 0);
