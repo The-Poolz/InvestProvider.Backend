@@ -3,19 +3,28 @@ using Newtonsoft.Json;
 using Net.Web3.EthereumWallet;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.DynamoDb.Models;
+using InvestProvider.Backend.Services.Validators.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
-public class GenerateSignatureRequest : IRequest<GenerateSignatureResponse>, IValidatedGenerateSignatureRequest
+[method: JsonConstructor]
+public class GenerateSignatureRequest(string projectId, EthereumAddress userAddress, string weiAmount)
+    : IRequest<GenerateSignatureResponse>, IValidatedStrapiProjectInfo, IValidatedDynamoDbProjectInfo, IValidatedInvestAmount, INotAlreadyInvestedAmount
 {
     [JsonRequired]
-    public string ProjectId { get; set; } = null!;
+    public string ProjectId { get; } = projectId;
 
     [JsonRequired]
-    public EthereumAddress UserAddress { get; set; } = null!;
+    public EthereumAddress UserAddress { get; } = userAddress;
 
     [JsonRequired]
-    public string WeiAmount { get; set; } = null!;
+    public string WeiAmount { get; } = weiAmount;
+
+    [JsonIgnore]
+    public decimal Amount { get; set; }
+
+    [JsonIgnore]
+    public byte TokenDecimals { get; set; }
 
     [JsonIgnore]
     public ProjectInfo StrapiProjectInfo { get; set; } = null!;

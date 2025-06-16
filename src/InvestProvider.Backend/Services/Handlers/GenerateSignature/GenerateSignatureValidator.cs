@@ -1,35 +1,34 @@
 ﻿using FluentValidation;
-using Amazon.DynamoDBv2.DataModel;
-using Net.Utils.ErrorHandler.Extensions;
-using InvestProvider.Backend.Services.Strapi;
-using InvestProvider.Backend.Services.DynamoDb.Models;
+using InvestProvider.Backend.Services.Validators.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
 public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSignatureRequest>
 {
-    public GenerateSignatureRequestValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
+    public GenerateSignatureRequestValidator(
+        IValidator<IValidatedStrapiProjectInfo> strapiProjectInfoValidator,
+        IValidator<IValidatedDynamoDbProjectInfo> dynamoDbProjectInfoValidator,
+        IValidator<IValidatedInvestAmount> investAmountValidator,
+        IValidator<INotAlreadyInvestedAmount> alreadyInvestedValidator
+    )
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
         RuleFor(x => x.ProjectId).NotNull().NotEmpty();
 
         RuleFor(x => x.WeiAmount).NotNull().NotEmpty();
 
         RuleFor(x => x)
-            .Must(request =>
-            {
-                request.StrapiProjectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
-                return request.StrapiProjectInfo.CurrentPhase != null;
-            })
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE);
+            .SetValidator(strapiProjectInfoValidator);
 
         RuleFor(x => x)
-            .MustAsync(async (request, cancellationToken) =>
-            {
-                request.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+            .SetValidator(dynamoDbProjectInfoValidator);
 
-                return request.DynamoDbProjectsInfo != null;
-            })
-            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND);
+        RuleFor(x => x)
+            .SetValidator(investAmountValidator);
+
+        RuleFor(x => x)
+            .SetValidator(alreadyInvestedValidator);
     }
 }
