@@ -11,10 +11,6 @@ namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 [method: JsonConstructor]
 public class GenerateSignatureRequest(string projectId, EthereumAddress userAddress, string weiAmount) :
     IRequest<GenerateSignatureResponse>, 
-    IValidatedStrapiProjectInfo,
-    IValidatedDynamoDbProjectInfo,
-    IValidatedInvestAmount,
-    INotAlreadyInvestedAmount,
     IFcfsSignature,
     IWhiteListSignature
 {
