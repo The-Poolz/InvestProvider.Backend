@@ -11,9 +11,6 @@
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="Services\Handlers\GenerateSignature\Models\IValidatedGenerateSignatureRequest.cs~RF2637bcb.TMP" />
-  </ItemGroup>
-  <ItemGroup>
     <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
     <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="2.2.3" />
     <PackageReference Include="MediatR" Version="12.5.0" />

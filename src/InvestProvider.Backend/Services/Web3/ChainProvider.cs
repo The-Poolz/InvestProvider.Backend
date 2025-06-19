@@ -1,4 +1,5 @@
 ﻿using Nethereum.Web3;
+using System.Collections.Concurrent;
 using NethereumGenerators.Interfaces;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
@@ -9,7 +10,7 @@ namespace InvestProvider.Backend.Services.Web3;
 
 public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>, IRpcProvider
 {
-    private readonly Dictionary<long, OnChainInfo> ChainsInfo = new();
+    private readonly ConcurrentDictionary<long, Lazy<OnChainInfo>> ChainsInfo = new();
 
     public string RpcUrl(long chainId)
     {
@@ -36,13 +37,13 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>,
 
     private OnChainInfo FetchChainInfo(long chainId)
     {
-        if (ChainsInfo.TryGetValue(chainId, out var chain))
-        {
-            return chain;
-        }
-
-        var chainInfo = strapi.ReceiveOnChainInfo(chainId);
-        ChainsInfo.Add(chainId, chainInfo);
-        return chainInfo;
+        return ChainsInfo
+            .GetOrAdd(
+                chainId,
+                x => new Lazy<OnChainInfo>(
+                    () => strapi.ReceiveOnChainInfo(x),
+                    LazyThreadSafetyMode.ExecutionAndPublication
+                )
+            ).Value;
     }
 }

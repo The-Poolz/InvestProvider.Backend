@@ -2,8 +2,7 @@
 
 namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IValidatedStrapiProjectInfo
+public interface IValidatedStrapiProjectInfo : IHasProjectId
 {
-    public string ProjectId { get; }
     public ProjectInfo StrapiProjectInfo { get; set; }
 }

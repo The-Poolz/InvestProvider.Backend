@@ -22,7 +22,9 @@ public class WhiteListSignatureValidator : AbstractValidator<IWhiteListSignature
                 );
                 return x.WhiteList != null;
             })
-            .WithError(Error.NOT_IN_WHITE_LIST)
+            .WithError(Error.NOT_IN_WHITE_LIST);
+
+        RuleFor(x => x)
             .Must(x => x.Amount + x.InvestedAmount <= x.WhiteList.Amount)
             .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT);
     }
