@@ -11,6 +11,8 @@ public class AdminCreatePoolzBackIdValidator : AbstractValidator<AdminCreatePool
         IValidator<IInvestPool> investPoolValidator
     )
     {
+        ClassLevelCascadeMode = CascadeMode.Stop;
+
         RuleFor(x => x)
             .SetValidator(strapiProjectInfoValidator);
 
