@@ -2,6 +2,7 @@
 using System.Numerics;
 using FluentValidation;
 using Net.Cache.DynamoDb.ERC20;
+using EnvironmentManager.Extensions;
 using Net.Cache.DynamoDb.ERC20.Models;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Web3;
@@ -13,7 +14,7 @@ namespace InvestProvider.Backend.Services.Validators;
 
 public class InvestAmountValidator : AbstractValidator<IValidatedInvestAmount>
 {
-    public const byte MinInvestAmount = 1;
+    public readonly byte MinInvestAmount = Env.MIN_INVEST_AMOUNT.GetOrDefault<byte>(1);
 
     public InvestAmountValidator(
         IRpcProvider rpcProvider,
@@ -40,9 +41,10 @@ public class InvestAmountValidator : AbstractValidator<IValidatedInvestAmount>
 
                 return x.Amount >= MinInvestAmount;
             })
-            .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, new
+            .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
-                MinInvestAmount
+                UserAmount = x.Amount,
+                MinInvestAmount = UnitConversion.Convert.FromWei(MinInvestAmount, x.TokenDecimals)
             });
     }
 }

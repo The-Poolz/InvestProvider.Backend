@@ -16,6 +16,9 @@ public class DynamoDbProjectInfoValidator : AbstractValidator<IValidatedDynamoDb
                 x.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(x.ProjectId, cancellationToken);
                 return x.DynamoDbProjectsInfo != null;
             })
-            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND);
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new
+            {
+                x.ProjectId
+            });
     }
 }

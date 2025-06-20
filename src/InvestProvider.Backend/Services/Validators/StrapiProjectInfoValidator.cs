@@ -15,6 +15,9 @@ public class StrapiProjectInfoValidator : AbstractValidator<IValidatedStrapiProj
                 x.StrapiProjectInfo = strapi.ReceiveProjectInfo(x.ProjectId, filterPhases: true);
                 return x.StrapiProjectInfo.CurrentPhase != null;
             })
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE);
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new
+            {
+                x.ProjectId
+            });
     }
 }

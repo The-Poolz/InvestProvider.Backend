@@ -25,10 +25,10 @@ public abstract class SignatureValidatorBase<T> : AbstractValidator<T>
                 .ToArray();
 
             x.InvestedAmount = x.UserInvestments
-                .Where(ui =>
-                    ui.BlockCreation >= x.StrapiProjectInfo.CurrentPhase!.Start &&
-                    ui.BlockCreation < x.StrapiProjectInfo.CurrentPhase.Finish)
-                .Sum(ui => UnitConversion.Convert.FromWei(ui.Amount, x.TokenDecimals));
+                .Where(ui => 
+                    ui.BlockCreation >= x.StrapiProjectInfo.CurrentPhase!.Start && 
+                    ui.BlockCreation < x.StrapiProjectInfo.CurrentPhase.Finish
+                ).Sum(ui => UnitConversion.Convert.FromWei(ui.Amount, x.TokenDecimals));
         });
     }
 }

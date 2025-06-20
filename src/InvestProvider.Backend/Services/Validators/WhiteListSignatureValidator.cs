@@ -24,8 +24,18 @@ public class WhiteListSignatureValidator : SignatureValidatorBase<IWhiteListSign
                 );
                 return x.WhiteList != null;
             })
-            .WithError(Error.NOT_IN_WHITE_LIST)
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new
+            {
+                x.ProjectId,
+                PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id,
+                UserAddress = x.UserAddress.Address
+            })
             .Must(x => x.Amount + x.InvestedAmount <= x.WhiteList.Amount)
-            .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT);
+            .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT, x => new
+            {
+                UserAmount = x.Amount,
+                MaxInvestAmount = x.WhiteList.Amount,
+                InvestSum = x.InvestedAmount
+            });
     }
 }
