@@ -7,7 +7,7 @@ namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSignatureRequest>
 {
     public GenerateSignatureRequestValidator(
-        IValidator<IValidatedStrapiProjectInfo> strapiProjectInfoValidator,
+        IValidator<IExistActivePhase> existActivePhaseValidator,
         IValidator<IValidatedDynamoDbProjectInfo> dynamoDbProjectInfoValidator,
         IValidator<IValidatedInvestAmount> investAmountValidator,
         IValidator<IFcfsSignature> fcfsSignatureValidator,
@@ -21,7 +21,7 @@ public class GenerateSignatureRequestValidator : AbstractValidator<GenerateSigna
         RuleFor(x => x.WeiAmount).NotNull().NotEmpty();
 
         RuleFor(x => x)
-            .SetValidator(strapiProjectInfoValidator);
+            .SetValidator(existActivePhaseValidator);
 
         RuleFor(x => x)
             .SetValidator(dynamoDbProjectInfoValidator);

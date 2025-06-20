@@ -7,14 +7,14 @@ namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId;
 public class AdminCreatePoolzBackIdValidator : AbstractValidator<AdminCreatePoolzBackIdRequest>
 {
     public AdminCreatePoolzBackIdValidator(
-        IValidator<IValidatedStrapiProjectInfo> strapiProjectInfoValidator,
+        IValidator<IExistActivePhase> existActivePhaseValidator,
         IValidator<IInvestPool> investPoolValidator
     )
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x)
-            .SetValidator(strapiProjectInfoValidator);
+            .SetValidator(existActivePhaseValidator);
 
         RuleFor(x => x)
             .SetValidator(investPoolValidator);

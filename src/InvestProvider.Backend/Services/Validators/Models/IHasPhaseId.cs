@@ -2,5 +2,5 @@
 
 public interface IHasPhaseId
 {
-    public string PhaseId { get; set; }
+    public string PhaseId { get; }
 }

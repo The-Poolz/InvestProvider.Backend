@@ -4,9 +4,9 @@ using InvestProvider.Backend.Services.Validators.Models;
 
 namespace InvestProvider.Backend.Services.Validators;
 
-public class PhaseValidator : AbstractValidator<IValidatedPhase>
+public class ExistPhaseValidator : AbstractValidator<IExistPhase>
 {
-    public PhaseValidator()
+    public ExistPhaseValidator()
     {
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
@@ -21,8 +21,6 @@ public class PhaseValidator : AbstractValidator<IValidatedPhase>
                 x.ProjectId,
                 x.PhaseId
             })
-            .Must(x => x.Phase.MaxInvest == 0)
-            .WithError(Error.PHASE_IS_NOT_WHITELIST)
             .Must(x => DateTime.UtcNow < x.Phase.Finish)
             .WithError(Error.PHASE_FINISHED, x => new
             {

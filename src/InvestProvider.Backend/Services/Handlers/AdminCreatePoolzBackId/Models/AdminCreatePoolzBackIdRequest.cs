@@ -10,7 +10,7 @@ namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models
 public class AdminCreatePoolzBackIdRequest :
     ProjectsInformation,
     IRequest<AdminCreatePoolzBackIdResponse>,
-    IValidatedStrapiProjectInfo,
+    IExistActivePhase,
     IInvestPool
 {
     [JsonRequired]

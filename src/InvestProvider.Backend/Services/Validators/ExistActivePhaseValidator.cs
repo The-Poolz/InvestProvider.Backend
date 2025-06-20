@@ -5,23 +5,23 @@ using InvestProvider.Backend.Services.Validators.Models;
 
 namespace InvestProvider.Backend.Services.Validators;
 
-public class StrapiProjectInfoValidator : AbstractValidator<IValidatedStrapiProjectInfo>
+public class ExistActivePhaseValidator : AbstractValidator<IExistActivePhase>
 {
     private readonly IStrapiClient _strapi;
 
-    public StrapiProjectInfoValidator(IStrapiClient strapi)
+    public ExistActivePhaseValidator(IStrapiClient strapi)
     {
         _strapi = strapi;
 
         RuleFor(x => x)
-            .Must(NotNullProjectsInformation)
+            .Must(NotNullCurrentPhase)
             .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new
             {
                 x.ProjectId
             });
     }
 
-    private bool NotNullProjectsInformation(IValidatedStrapiProjectInfo model)
+    private bool NotNullCurrentPhase(IExistActivePhase model)
     {
         model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
         return model.StrapiProjectInfo.CurrentPhase != null;

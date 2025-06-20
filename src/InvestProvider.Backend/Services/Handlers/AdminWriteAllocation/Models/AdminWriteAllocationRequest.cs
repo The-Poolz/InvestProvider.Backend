@@ -7,19 +7,20 @@ using ProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.Proj
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
-public class AdminWriteAllocationRequest :
+public class AdminWriteAllocationRequest(string projectId, string phaseId, ICollection<UserWithAmount> users) :
     IRequest<AdminWriteAllocationResponse>,
     IValidatedDynamoDbProjectInfo,
-    IValidatedPhase
+    IExistPhase,
+    IWhiteListPhase
 {
     [JsonRequired]
-    public string ProjectId { get; set; } = null!;
+    public string ProjectId { get; } = projectId;
 
     [JsonRequired]
-    public string PhaseId { get; set; } = null!;
+    public string PhaseId { get; } = phaseId;
 
     [JsonRequired]
-    public ICollection<UserWithAmount> Users { get; set; } = null!;
+    public ICollection<UserWithAmount> Users { get; set; } = users;
 
     [JsonIgnore]
     public bool FilterPhases => false;

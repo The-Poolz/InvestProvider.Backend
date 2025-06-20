@@ -2,7 +2,7 @@
 
 namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IValidatedPhase : IHasPhaseId, IValidatedStrapiProjectInfo
+public interface IExistPhase : IHasPhaseId, IExistActivePhase
 {
     public ComponentPhaseStartEndAmount Phase { get; set; }
 }

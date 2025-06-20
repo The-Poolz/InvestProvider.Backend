@@ -7,9 +7,10 @@ namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 public class AdminWriteAllocationValidator : AbstractValidator<AdminWriteAllocationRequest>
 {
     public AdminWriteAllocationValidator(
-        IValidator<IValidatedStrapiProjectInfo> strapiProjectInfoValidator,
+        IValidator<IExistActivePhase> existActivePhaseValidator,
         IValidator<IValidatedDynamoDbProjectInfo> dynamoDbProjectInfoValidator,
-        IValidator<IValidatedPhase> phaseValidator
+        IValidator<IExistPhase> existPhaseValidator,
+        IValidator<IWhiteListPhase> whiteListValidator
     )
     {
         ClassLevelCascadeMode = CascadeMode.Stop;
@@ -18,9 +19,12 @@ public class AdminWriteAllocationValidator : AbstractValidator<AdminWriteAllocat
             .SetValidator(dynamoDbProjectInfoValidator);
 
         RuleFor(x => x)
-            .SetValidator(strapiProjectInfoValidator);
+            .SetValidator(existActivePhaseValidator);
 
         RuleFor(x => x)
-            .SetValidator(phaseValidator);
+            .SetValidator(existPhaseValidator);
+
+        RuleFor(x => x)
+            .SetValidator(whiteListValidator);
     }
 }
