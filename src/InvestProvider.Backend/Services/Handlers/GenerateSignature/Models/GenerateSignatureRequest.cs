@@ -24,6 +24,9 @@ public class GenerateSignatureRequest(string projectId, EthereumAddress userAddr
     public string WeiAmount { get; } = weiAmount;
 
     [JsonIgnore]
+    public bool FilterPhases => true;
+
+    [JsonIgnore]
     public decimal Amount { get; set; }
 
     [JsonIgnore]

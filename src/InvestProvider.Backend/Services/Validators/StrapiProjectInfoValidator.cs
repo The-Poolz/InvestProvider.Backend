@@ -23,7 +23,7 @@ public class StrapiProjectInfoValidator : AbstractValidator<IValidatedStrapiProj
 
     private bool NotNullProjectsInformation(IValidatedStrapiProjectInfo model)
     {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: true);
+        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
         return model.StrapiProjectInfo.CurrentPhase != null;
     }
 }

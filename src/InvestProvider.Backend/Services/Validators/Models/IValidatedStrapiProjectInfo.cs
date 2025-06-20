@@ -4,5 +4,6 @@ namespace InvestProvider.Backend.Services.Validators.Models;
 
 public interface IValidatedStrapiProjectInfo : IHasProjectId
 {
+    public bool FilterPhases { get; }
     public ProjectInfo StrapiProjectInfo { get; set; }
 }
