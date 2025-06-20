@@ -10,20 +10,16 @@ namespace InvestProvider.Backend.Services.Validators;
 
 public class WhiteListSignatureValidator : SignatureValidatorBase<IWhiteListSignature>
 {
+    private readonly IDynamoDBContext _dynamoDb;
+
     public WhiteListSignatureValidator(IDynamoDBContext dynamoDb, IInvestProviderService<ContractType> investProvider)
         : base(investProvider)
     {
+        _dynamoDb = dynamoDb;
+
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
-            .MustAsync(async (x, cancellationToken) =>
-            {
-                x.WhiteList = await dynamoDb.LoadAsync<WhiteList>(
-                    hashKey: WhiteList.CalculateHashId(x.ProjectId, x.StrapiProjectInfo.CurrentPhase!.Start!.Value),
-                    rangeKey: x.UserAddress.Address,
-                    cancellationToken
-                );
-                return x.WhiteList != null;
-            })
+            .MustAsync(NotNullWhiteListAsync)
             .WithError(Error.NOT_IN_WHITE_LIST, x => new
             {
                 x.ProjectId,
@@ -37,5 +33,15 @@ public class WhiteListSignatureValidator : SignatureValidatorBase<IWhiteListSign
                 MaxInvestAmount = x.WhiteList.Amount,
                 InvestSum = x.InvestedAmount
             });
+    }
+
+    private async Task<bool> NotNullWhiteListAsync(IWhiteListSignature model, CancellationToken cancellationToken)
+    {
+        model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
+            hashKey: WhiteList.CalculateHashId(model.ProjectId, model.StrapiProjectInfo.CurrentPhase!.Start!.Value),
+            rangeKey: model.UserAddress.Address,
+            cancellationToken
+        );
+        return model.WhiteList != null;
     }
 }

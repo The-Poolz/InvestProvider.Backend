@@ -8,17 +8,23 @@ namespace InvestProvider.Backend.Services.Validators;
 
 public class DynamoDbProjectInfoValidator : AbstractValidator<IValidatedDynamoDbProjectInfo>
 {
+    private readonly IDynamoDBContext _dynamoDb;
+
     public DynamoDbProjectInfoValidator(IDynamoDBContext dynamoDb)
     {
+        _dynamoDb = dynamoDb;
+
         RuleFor(x => x)
-            .MustAsync(async (x, cancellationToken) =>
-            {
-                x.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(x.ProjectId, cancellationToken);
-                return x.DynamoDbProjectsInfo != null;
-            })
+            .MustAsync(NotNullProjectsInformationAsync)
             .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new
             {
                 x.ProjectId
             });
+    }
+
+    private async Task<bool> NotNullProjectsInformationAsync(IValidatedDynamoDbProjectInfo model, CancellationToken cancellationToken)
+    {
+        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, cancellationToken);
+        return model.DynamoDbProjectsInfo != null;
     }
 }

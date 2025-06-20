@@ -14,6 +14,9 @@ namespace InvestProvider.Backend.Services.Validators;
 
 public class InvestAmountValidator : AbstractValidator<IValidatedInvestAmount>
 {
+    private readonly IRpcProvider _rpcProvider;
+    private readonly ERC20CacheProvider _erc20Cache;
+    private readonly ILockDealNFTService<ContractType> _lockDealNFT;
     public readonly byte MinInvestAmount = Env.MIN_INVEST_AMOUNT.GetOrDefault<byte>(1);
 
     public InvestAmountValidator(
@@ -22,29 +25,35 @@ public class InvestAmountValidator : AbstractValidator<IValidatedInvestAmount>
         ILockDealNFTService<ContractType> lockDealNFT
     )
     {
+        _rpcProvider = rpcProvider;
+        _erc20Cache = erc20Cache;
+        _lockDealNFT = lockDealNFT;
+
         RuleFor(x => x)
-            .MustAsync(async (x, _) =>
-            {
-                var tokenAddress = await lockDealNFT.TokenOfQueryAsync(
-                    x.StrapiProjectInfo.ChainId,
-                    ContractType.LockDealNFT,
-                    x.DynamoDbProjectsInfo.PoolzBackId
-                );
-
-                x.TokenDecimals = erc20Cache.GetOrAdd(new GetCacheRequest(
-                    x.StrapiProjectInfo.ChainId,
-                    tokenAddress,
-                    rpcProvider.RpcUrl(x.StrapiProjectInfo.ChainId)
-                )).Decimals;
-
-                x.Amount = UnitConversion.Convert.FromWei(BigInteger.Parse(x.WeiAmount), x.TokenDecimals);
-
-                return x.Amount >= MinInvestAmount;
-            })
+            .MustAsync((x, _) => MustMoreThanAllowedMinimumAsync(x))
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
                 UserAmount = x.Amount,
                 MinInvestAmount = UnitConversion.Convert.FromWei(MinInvestAmount, x.TokenDecimals)
             });
+    }
+
+    private async Task<bool> MustMoreThanAllowedMinimumAsync(IValidatedInvestAmount model)
+    {
+        var tokenAddress = await _lockDealNFT.TokenOfQueryAsync(
+            model.StrapiProjectInfo.ChainId,
+            ContractType.LockDealNFT,
+            model.DynamoDbProjectsInfo.PoolzBackId
+        );
+
+        model.TokenDecimals = _erc20Cache.GetOrAdd(new GetCacheRequest(
+            model.StrapiProjectInfo.ChainId,
+            tokenAddress,
+            _rpcProvider.RpcUrl(model.StrapiProjectInfo.ChainId)
+        )).Decimals;
+
+        model.Amount = UnitConversion.Convert.FromWei(BigInteger.Parse(model.WeiAmount), model.TokenDecimals);
+
+        return model.Amount >= MinInvestAmount;
     }
 }

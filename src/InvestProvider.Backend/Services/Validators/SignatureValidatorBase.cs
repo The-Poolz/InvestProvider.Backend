@@ -12,15 +12,16 @@ public abstract class SignatureValidatorBase<T> : AbstractValidator<T>
 {
     protected SignatureValidatorBase(IInvestProviderService<ContractType> investProvider)
     {
-        RuleFor(x => x).CustomAsync(async (x, ctx, _) =>
+        RuleFor(x => x).CustomAsync(async (x, _, _) =>
         {
-            var resp = await investProvider.GetUserInvestsQueryAsync(
+            var response = await investProvider.GetUserInvestsQueryAsync(
                 x.StrapiProjectInfo.ChainId,
                 ContractType.InvestedProvider,
                 x.DynamoDbProjectsInfo.PoolzBackId,
-                x.UserAddress);
+                x.UserAddress
+            );
 
-            x.UserInvestments = resp.ReturnValue1
+            x.UserInvestments = response.ReturnValue1
                 .Select(ui => new UserInvestments(ui))
                 .ToArray();
 

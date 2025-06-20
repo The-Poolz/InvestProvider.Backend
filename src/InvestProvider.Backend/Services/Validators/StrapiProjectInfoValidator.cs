@@ -7,17 +7,23 @@ namespace InvestProvider.Backend.Services.Validators;
 
 public class StrapiProjectInfoValidator : AbstractValidator<IValidatedStrapiProjectInfo>
 {
+    private readonly IStrapiClient _strapi;
+
     public StrapiProjectInfoValidator(IStrapiClient strapi)
     {
+        _strapi = strapi;
+
         RuleFor(x => x)
-            .Must(x =>
-            {
-                x.StrapiProjectInfo = strapi.ReceiveProjectInfo(x.ProjectId, filterPhases: true);
-                return x.StrapiProjectInfo.CurrentPhase != null;
-            })
+            .Must(NotNullProjectsInformation)
             .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new
             {
                 x.ProjectId
             });
+    }
+
+    private bool NotNullProjectsInformation(IValidatedStrapiProjectInfo model)
+    {
+        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: true);
+        return model.StrapiProjectInfo.CurrentPhase != null;
     }
 }
