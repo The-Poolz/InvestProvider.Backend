@@ -1,4 +1,4 @@
-name: CI
+name: PR Tests
 
 on:
   pull_request:
@@ -16,8 +16,8 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore InvestProvider.Backend.sln
       - name: Build
-        run: dotnet build --configuration Release
+        run: dotnet build InvestProvider.Backend.sln --configuration Release --no-restore
       - name: Test
-        run: dotnet test --no-build --configuration Release
+        run: dotnet test tests/InvestProvider.Backend.Tests/InvestProvider.Backend.Tests.csproj --configuration Release --no-build
