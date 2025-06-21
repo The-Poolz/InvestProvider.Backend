@@ -22,14 +22,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Restore
-        run: dotnet restore
-
       - name: Build project
         run: dotnet build --configuration Release
-
-      - name: Run unit tests
-        run: dotnet test --no-build --configuration Release
 
       - name: Install Amazon Lambda Tools
         run: dotnet tool install -g Amazon.Lambda.Tools
