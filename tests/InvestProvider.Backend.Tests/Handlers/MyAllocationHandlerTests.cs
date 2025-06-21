@@ -25,7 +25,13 @@ public class MyAllocationHandlerTests
         type.GetProperty("Id")?.SetValue(obj, id);
         type.GetProperty("Start")?.SetValue(obj, (DateTime?)start);
         type.GetProperty("Finish")?.SetValue(obj, (DateTime?)finish);
-        type.GetProperty("MaxInvest")?.SetValue(obj, (decimal?)maxInvest);
+        var maxInvestProp = type.GetProperty("MaxInvest");
+        if (maxInvestProp != null)
+        {
+            var targetType = Nullable.GetUnderlyingType(maxInvestProp.PropertyType) ?? maxInvestProp.PropertyType;
+            object? converted = Convert.ChangeType(maxInvest, targetType);
+            maxInvestProp.SetValue(obj, converted);
+        }
         return obj;
     }
 
@@ -97,7 +103,7 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projectData);
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync((WhiteList?)null);
+                .Returns(Task.FromResult<WhiteList?>(null));
 
         var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x123"));
