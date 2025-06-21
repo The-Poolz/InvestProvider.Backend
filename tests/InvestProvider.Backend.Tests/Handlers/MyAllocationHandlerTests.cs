@@ -67,8 +67,9 @@ public class MyAllocationHandlerTests
                 .ReturnsAsync(projectData);
 
         var address = new EthereumAddress("0x123");
-        var whiteList = new WhiteList("pid", ((dynamic)phase).Start, address, 10);
-        dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", ((dynamic)phase).Start), address.Address, It.IsAny<CancellationToken>()))
+        var startTime = (DateTime)((dynamic)phase).Start;
+        var whiteList = new WhiteList("pid", startTime, address, 10);
+        dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(whiteList);
 
         var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
