@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Moq;
 using Xunit;
+using FluentValidation;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
@@ -108,7 +109,7 @@ public class MyAllocationHandlerTests
         var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
 
-        var ex = await Assert.ThrowsAsync<Exception>(() => handler.Handle(request, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => handler.Handle(request, CancellationToken.None));
         Assert.Contains("User not in white list", ex.Message);
     }
 }
