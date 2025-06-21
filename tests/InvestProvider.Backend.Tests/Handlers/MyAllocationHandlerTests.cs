@@ -72,7 +72,7 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projectData);
 
-        var address = new EthereumAddress("0x123");
+        var address = new EthereumAddress("0x0000000000000000000000000000000000000123");
         var startTime = (DateTime)((dynamic)phase).Start;
         var whiteList = new WhiteList("pid", startTime, address, 10);
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
@@ -106,7 +106,7 @@ public class MyAllocationHandlerTests
                 .Returns(Task.FromResult<WhiteList?>(null));
 
         var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
-        var request = new MyAllocationRequest("pid", new EthereumAddress("0x123"));
+        var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
 
         var ex = await Assert.ThrowsAsync<Exception>(() => handler.Handle(request, CancellationToken.None));
         Assert.Contains("User not in white list", ex.Message);
