@@ -49,3 +49,8 @@ If already installed check if new version is available.
 ```bash
 dotnet tool update -g Amazon.Lambda.TestTool-8.0
 ```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+
