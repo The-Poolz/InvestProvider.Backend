@@ -100,7 +100,7 @@ public class GenerateSignatureHandler(
 
     private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
     {
-        if (phase.MaxInvest > amount)
+        if (amount > phase.MaxInvest)
         {
             throw Error.AMOUNT_EXCEED_MAX_INVEST.ToException(new
             {
