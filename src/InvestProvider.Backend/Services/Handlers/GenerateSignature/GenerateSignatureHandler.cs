@@ -100,9 +100,6 @@ public class GenerateSignatureHandler(
 
     private static void ValidateFCFS(ComponentPhaseStartEndAmount phase, decimal amount, decimal investSum)
     {
-        // Ensure the user doesn't try to invest more than allowed in FCFS mode
-        // phase.MaxInvest represents the maximum allowed amount per user
-        // so we should validate the requested amount does not exceed this limit
         if (amount > phase.MaxInvest)
         {
             throw Error.AMOUNT_EXCEED_MAX_INVEST.ToException(new
