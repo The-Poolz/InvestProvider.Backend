@@ -104,7 +104,7 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projectData);
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<WhiteList?>(null));
+                .Returns(Task.FromResult<WhiteList>(null!));
 
         var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
