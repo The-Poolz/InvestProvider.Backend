@@ -1,28 +1,73 @@
-﻿using FluentValidation;
-using InvestProvider.Backend.Services.Validators.Models;
+using FluentValidation;
+using Net.Utils.ErrorHandler.Extensions;
+using Amazon.DynamoDBv2.DataModel;
+using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
+using InvestProvider.Backend.Services.DynamoDb.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.MyAllocation;
 
 public class MyAllocationValidator : AbstractValidator<MyAllocationRequest>
 {
-    public MyAllocationValidator(
-        IValidator<IValidatedDynamoDbProjectInfo> dynamoDbProjectInfoValidator,
-        IValidator<IExistPhase> existPhaseValidator,
-        IValidator<IWhiteListPhase> whiteListValidator,
-        IValidator<IWhiteListUser> whiteListUserValidator
-    )
+    private readonly IStrapiClient _strapi;
+    private readonly IDynamoDBContext _dynamoDb;
+
+    public MyAllocationValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
     {
-        RuleFor(x => x)
-            .SetValidator(dynamoDbProjectInfoValidator);
+        _strapi = strapi;
+        _dynamoDb = dynamoDb;
 
         RuleFor(x => x)
-            .SetValidator(existPhaseValidator);
+            .MustAsync(NotNullProjectsInformationAsync)
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId });
 
         RuleFor(x => x)
-            .SetValidator(whiteListValidator);
+            .Must(NotNullCurrentPhase)
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId });
 
         RuleFor(x => x)
-            .SetValidator(whiteListUserValidator);
+            .Cascade(CascadeMode.Stop)
+            .Must(SetPhase)
+            .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
+            .Must(x => DateTime.UtcNow < x.Phase.Finish)
+            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow });
+
+        RuleFor(x => x)
+            .Must(x => x.Phase.MaxInvest == 0)
+            .WithError(Error.PHASE_IS_NOT_WHITELIST);
+
+        RuleFor(x => x)
+            .Cascade(CascadeMode.Stop)
+            .MustAsync(NotNullWhiteListAsync)
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
+    }
+
+    private bool NotNullCurrentPhase(MyAllocationRequest model)
+    {
+        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
+        return model.StrapiProjectInfo.CurrentPhase != null;
+    }
+
+    private async Task<bool> NotNullProjectsInformationAsync(MyAllocationRequest model, CancellationToken token)
+    {
+        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token);
+        return model.DynamoDbProjectsInfo != null;
+    }
+
+    private bool SetPhase(MyAllocationRequest model)
+    {
+        var phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId);
+        model.Phase = phase!;
+        return phase != null;
+    }
+
+    private async Task<bool> NotNullWhiteListAsync(MyAllocationRequest model, CancellationToken token)
+    {
+        model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
+            hashKey: WhiteList.CalculateHashId(model.ProjectId, model.StrapiProjectInfo.CurrentPhase!.Start!.Value),
+            rangeKey: model.UserAddress.Address,
+            token
+        );
+        return model.WhiteList != null;
     }
 }
