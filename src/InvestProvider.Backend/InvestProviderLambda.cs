@@ -9,17 +9,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace InvestProvider.Backend;
 
-public class InvestProviderLambda(IServiceProvider serviceProvider)
+public class InvestProviderLambda(IMediator mediator)
 {
-    public InvestProviderLambda() : this(DefaultServiceProvider.Build()) { }
+    public InvestProviderLambda() : this(
+        DefaultServiceProvider.Build().GetRequiredService<IMediator>()) { }
 
     public async Task<LambdaResponse> RunAsync(LambdaRequest request)
     {
         try
         {
-            var response = await serviceProvider
-                .GetRequiredService<IMediator>()
-                .Send(request.HandlerRequest);
+            var response = await mediator.Send(request.HandlerRequest);
             return new LambdaResponse(response);
         }
         catch (ValidationException ex)
