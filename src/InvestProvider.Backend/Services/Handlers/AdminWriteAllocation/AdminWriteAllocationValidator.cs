@@ -1,5 +1,4 @@
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
@@ -12,7 +11,6 @@ public class AdminWriteAllocationValidator : BasePhaseValidator<AdminWriteAlloca
     public AdminWriteAllocationValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
         : base(strapi, dynamoDb)
     {
-
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         WhiteListPhaseRules(this);

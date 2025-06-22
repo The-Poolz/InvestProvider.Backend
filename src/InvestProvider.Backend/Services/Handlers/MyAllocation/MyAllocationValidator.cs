@@ -11,7 +11,6 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
     public MyAllocationValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
         : base(strapi, dynamoDb)
     {
-
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         WhiteListPhaseRules(this)
