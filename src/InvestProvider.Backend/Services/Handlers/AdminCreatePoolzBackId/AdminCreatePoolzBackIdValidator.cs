@@ -23,10 +23,9 @@ public class AdminCreatePoolzBackIdValidator : AbstractValidator<AdminCreatePool
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x)
+            .Cascade(CascadeMode.Stop)
             .Must(NotNullCurrentPhase)
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId });
-
-        RuleFor(x => x)
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
             .MustAsync(async (x, _) =>
             {
                 var data = await _lockDealNFT.GetFullDataQueryAsync(x.ChainId, ContractType.LockDealNFT, x.PoolzBackId);

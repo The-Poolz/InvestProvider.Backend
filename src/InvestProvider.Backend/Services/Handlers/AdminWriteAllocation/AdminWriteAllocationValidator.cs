@@ -20,21 +20,15 @@ public class AdminWriteAllocationValidator : AbstractValidator<AdminWriteAllocat
         ClassLevelCascadeMode = CascadeMode.Stop;
 
         RuleFor(x => x)
-            .MustAsync(NotNullProjectsInformationAsync)
-            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId });
-
-        RuleFor(x => x)
-            .Must(NotNullCurrentPhase)
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId });
-
-        RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
+            .MustAsync(NotNullProjectsInformationAsync)
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId })
+            .Must(NotNullCurrentPhase)
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
             .Must(SetPhase)
             .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
             .Must(x => DateTime.UtcNow < x.Phase.Finish)
-            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow });
-
-        RuleFor(x => x)
+            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow })
             .Must(x => x.Phase.MaxInvest == 0)
             .WithError(Error.PHASE_IS_NOT_WHITELIST);
     }

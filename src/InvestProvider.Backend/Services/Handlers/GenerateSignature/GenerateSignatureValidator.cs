@@ -43,24 +43,18 @@ public partial class GenerateSignatureRequestValidator : AbstractValidator<Gener
         RuleFor(x => x.WeiAmount).NotNull().NotEmpty();
 
         RuleFor(x => x)
+            .Cascade(CascadeMode.Stop)
             .Must(NotNullCurrentPhase)
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId });
-
-        RuleFor(x => x)
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
             .MustAsync(NotNullProjectsInformationAsync)
-            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId });
-
-        RuleFor(x => x)
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId })
             .MustAsync(MustMoreThanAllowedMinimumAsync)
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
                 UserAmount = x.Amount,
                 MinInvestAmount = UnitConversion.Convert.FromWei(_minInvestAmount, x.TokenDecimals)
-            });
-
-        RuleFor(x => x)
-            .CustomAsync(SetUserInvestmentsAsync)
-            .WhenAsync((x, _) => Task.FromResult(true));
+            })
+            .CustomAsync(SetUserInvestmentsAsync);
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
