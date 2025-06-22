@@ -9,6 +9,8 @@ namespace InvestProvider.Backend.Tests.Services;
 
 public class Eip712TypedDataTests
 {
+    private static readonly string[] expected = ["types", "domain", "primaryType", "message"];
+
     [Fact]
     public void ToEip712Json_ReturnsOrderedFieldsAndValues()
     {
@@ -25,7 +27,7 @@ public class Eip712TypedDataTests
 
         var obj = JObject.Parse(json);
 
-        Assert.Equal(new[] { "types", "domain", "primaryType", "message" }, obj.Properties().Select(p => p.Name).ToArray());
+        Assert.Equal(expected, obj.Properties().Select(p => p.Name).ToArray());
         Assert.Equal("InvestMessage", (string)obj["primaryType"]!);
         Assert.Equal(5, (long)obj["domain"]!["chainId"]!);
         Assert.Equal("0x00000000000000000000000000000000000000aa", (string)obj["domain"]!["verifyingContract"]!);
