@@ -2,7 +2,6 @@
 using Net.Cache.DynamoDb.ERC20;
 using Amazon.DynamoDBv2.DataModel;
 using NethereumGenerators.Interfaces;
-using InvestProvider.Backend.Extensions;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +9,8 @@ using poolz.finance.csharp.contracts.LockDealNFT;
 using InvestProvider.Backend.Services.Web3.Eip712;
 using poolz.finance.csharp.contracts.InvestProvider;
 using InvestProvider.Backend.Services.Web3.Contracts;
+using System.Reflection;
+using MediatR.Extensions.FluentValidation.AspNetCore;
 
 namespace InvestProvider.Backend.Services;
 
@@ -22,8 +23,8 @@ public static class DefaultServiceProvider
         .AddScoped<ISignerManager, SignerManager>()
         .AddScoped<SecretsManager.SecretManager>()
 #endif
-        .AddHandlers()
-        .AddValidators()
+        .AddMediatR(x => x.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
+        .AddFluentValidation([Assembly.GetExecutingAssembly()])
         .AddSingleton<IRpcProvider, ChainProvider>()
         .AddSingleton<IChainProvider<ContractType>, ChainProvider>()
         .AddSingleton<IStrapiClient, StrapiClient>()
