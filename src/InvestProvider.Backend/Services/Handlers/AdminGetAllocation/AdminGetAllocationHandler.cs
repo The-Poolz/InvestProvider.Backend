@@ -29,7 +29,7 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
                 var entities = await search.GetRemainingAsync(cancellationToken);
                 whiteLists.Add(new AdminGetAllocationResponse(
                     phaseId: phase.Id,
-                    whiteList: entities.Select(x => new UserWithAmount(x.UserAddress, x.Amount)).ToArray()
+                    whiteList: entities.Where(x => x.Amount > 0).Select(x => new UserWithAmount(x.UserAddress, x.Amount)).ToArray()
                 ));
             }
             finally

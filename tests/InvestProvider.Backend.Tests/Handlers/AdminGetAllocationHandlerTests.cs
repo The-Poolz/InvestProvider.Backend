@@ -60,4 +60,37 @@ public class AdminGetAllocationHandlerTests
         var phase2Result = result.First(r => r.PhaseId == "2");
         Assert.Equal(2, phase2Result.WhiteList.Count);
     }
+
+    [Fact]
+    public async Task Handle_FiltersOutZeroAmountEntries()
+    {
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
+        var phases = (System.Collections.IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(phase.GetType()))!;
+        phases.Add(phase);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phases);
+
+        var strapi = new Mock<IStrapiClient>();
+        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+
+        var dynamoDb = new Mock<IDynamoDBContext>();
+        var start = (DateTime)((dynamic)phase).Start;
+        var whiteLists = new List<WhiteList>
+        {
+            new("pid", start, new EthereumAddress("0x0000000000000000000000000000000000000001"), 0),
+            new("pid", start, new EthereumAddress("0x0000000000000000000000000000000000000002"), 5),
+        };
+        var hash = WhiteList.CalculateHashId("pid", start);
+        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash, null))
+                .Returns(new StubAsyncSearch<WhiteList>(whiteLists));
+
+        var handler = new AdminGetAllocationHandler(strapi.Object, dynamoDb.Object);
+        var request = new AdminGetAllocationRequest("pid");
+
+        var result = await handler.Handle(request, CancellationToken.None);
+
+        Assert.Single(result);
+        var phaseResult = result.First();
+        Assert.Single(phaseResult.WhiteList);
+        Assert.Equal("0x0000000000000000000000000000000000000002", phaseResult.WhiteList.First().UserAddress.Address);
+    }
 }
