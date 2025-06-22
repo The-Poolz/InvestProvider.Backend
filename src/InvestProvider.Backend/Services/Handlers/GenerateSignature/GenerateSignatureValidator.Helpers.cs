@@ -1,19 +1,12 @@
 using System.Numerics;
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
-using Net.Cache.DynamoDb.ERC20;
 using Net.Cache.DynamoDb.ERC20.Models;
 using EnvironmentManager.Extensions;
 using Nethereum.Util;
-using InvestProvider.Backend.Services.Strapi;
-using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.Web3.Contracts.Models;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using poolz.finance.csharp.contracts.LockDealNFT;
-using poolz.finance.csharp.contracts.InvestProvider;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
-using Amazon.DynamoDBv2.DataModel;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
