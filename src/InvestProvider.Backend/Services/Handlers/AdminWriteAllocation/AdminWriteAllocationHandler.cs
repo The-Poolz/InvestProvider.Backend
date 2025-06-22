@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Amazon.DynamoDBv2.DataModel;
 using Net.Web3.EthereumWallet.Extensions;
+using EnvironmentManager.Extensions;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
@@ -10,7 +11,7 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb)
     : IRequestHandler<AdminWriteAllocationRequest, AdminWriteAllocationResponse>
 {
     private const int BatchSize = 25;
-    private const int MaxParallel = 10;
+    private static readonly int MaxParallel = Env.MAX_PARALLEL.GetOrDefault<int>(10);
 
     public async Task<AdminWriteAllocationResponse> Handle(AdminWriteAllocationRequest request, CancellationToken cancellationToken)
     {

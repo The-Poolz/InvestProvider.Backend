@@ -2,6 +2,16 @@
 
 Lambda handler of API4.InvestProvider endpoints.
 
+## Environment variables
+| Name | Description | Default |
+| --- | --- | --- |
+| `STRAPI_GRAPHQL_URL` | URL of Strapi GraphQL endpoint | - |
+| `SECRET_ID_OF_SIGN_ACCOUNT` | Identifier of the signer's secret | - |
+| `SECRET_KEY_OF_SIGN_ACCOUNT` | Key of the signer's secret | - |
+| `PRIVATE_KEY_OF_LOCAL_SIGN_ACCOUNT` | Private key for development signer | - |
+| `MIN_INVEST_AMOUNT` | Minimum allowed invest amount | `1` |
+| `MAX_PARALLEL` | Max parallel operations for admin handlers | `10` |
+
 ## GenerateSignature handler
 This handler generate EIP712 signature for user that will use in [InvestProvider contract](https://github.com/The-Poolz/LockDealNFT.InvestProvider), in [invest(uint256 poolId, uint256 amount, uint256 validUntil, bytes calldata signature)](https://github.com/The-Poolz/LockDealNFT.InvestProvider?tab=readme-ov-file#investing-with-erc20-tokens) function.
 
