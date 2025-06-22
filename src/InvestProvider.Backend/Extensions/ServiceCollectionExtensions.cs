@@ -11,12 +11,9 @@ public static class ServiceCollectionExtensions
         .AddMediatR(x => x.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
     public static IServiceCollection AddValidators(this IServiceCollection serviceCollection) => serviceCollection
-        .AddMediatrRequestValidators()
-        .AddInternalValidators();
+        .AddMediatrRequestValidators();
 
     private static IServiceCollection AddMediatrRequestValidators(this IServiceCollection serviceCollection) =>
         serviceCollection.AddFluentValidation([Assembly.GetExecutingAssembly()]);
 
-    private static IServiceCollection AddInternalValidators(this IServiceCollection serviceCollection) =>
-        serviceCollection.AddValidatorsFromAssemblies([Assembly.GetExecutingAssembly()]);
 }

@@ -12,6 +12,7 @@ using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Handlers.MyAllocation;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
 using Net.Web3.EthereumWallet;
+using FluentValidation;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -77,9 +78,11 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(whiteList);
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", address);
 
+        await validator.ValidateAndThrowAsync(request);
         var result = await handler.Handle(request, CancellationToken.None);
 
         Assert.Equal(whiteList.Amount, result.Amount);
@@ -104,10 +107,15 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<WhiteList>(null!));
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
 
-        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => handler.Handle(request, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(async () =>
+        {
+            await validator.ValidateAndThrowAsync(request);
+            await handler.Handle(request, CancellationToken.None);
+        });
         Assert.Contains("User not in white list", ex.Message);
     }
 }
