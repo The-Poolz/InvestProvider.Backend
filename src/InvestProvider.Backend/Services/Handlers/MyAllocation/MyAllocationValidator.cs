@@ -14,18 +14,7 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x)
-            .Cascade(CascadeMode.Stop)
-            .MustAsync(NotNullProjectsInformationAsync)
-            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId })
-            .Must(NotNullCurrentPhase)
-            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
-            .Must(SetPhase)
-            .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
-            .Must(x => DateTime.UtcNow < x.PhaseContext.Phase.Finish)
-            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.PhaseContext.Phase.Finish, NowTime = DateTime.UtcNow })
-            .Must(x => x.PhaseContext.Phase.MaxInvest == 0)
-            .WithError(Error.PHASE_IS_NOT_WHITELIST)
+        WhiteListPhaseRules(this)
             .MustAsync(NotNullWhiteListAsync)
             .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.PhaseContext.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
