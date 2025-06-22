@@ -29,6 +29,9 @@ public class AdminWriteAllocationRequest(string projectId, string phaseId, IColl
     public ProjectInfo StrapiProjectInfo { get; set; } = null!;
 
     [JsonIgnore]
+    public long ChainId => StrapiProjectInfo.ChainId;
+
+    [JsonIgnore]
     public ProjectsInformation DynamoDbProjectsInfo { get; set; } = null!;
 
     [JsonIgnore]

@@ -40,4 +40,7 @@ public class MyAllocationRequest(string projectId, EthereumAddress userAddress) 
 
     [JsonIgnore]
     public WhiteList WhiteList { get; set; } = null!;
+
+    [JsonIgnore]
+    public long ChainId => StrapiProjectInfo.ChainId;
 }
