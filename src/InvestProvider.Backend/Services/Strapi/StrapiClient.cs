@@ -1,7 +1,6 @@
 ﻿using GraphQL;
 using GraphQL.Client.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Net.Web3.EthereumWallet;
 using Poolz.Finance.CSharp.Strapi;
 using EnvironmentManager.Extensions;
