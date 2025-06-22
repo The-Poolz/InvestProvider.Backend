@@ -12,7 +12,7 @@ namespace InvestProvider.Backend.Services.Handlers.AdminGetAllocation;
 public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dynamoDb)
     : IRequestHandler<AdminGetAllocationRequest, ICollection<AdminGetAllocationResponse>>
 {
-    public static readonly int MaxParallel = Env.MAX_PARALLEL.GetOrDefault<int>(10);
+    public static readonly int MaxParallel = Env.MAX_PARALLEL.GetOrDefault(10);
 
     public async Task<ICollection<AdminGetAllocationResponse>> Handle(AdminGetAllocationRequest request, CancellationToken cancellationToken)
     {
