@@ -35,16 +35,17 @@ public class StrapiClient : IStrapiClient
 
     public OnChainInfo ReceiveOnChainInfo(long chainId)
     {
-        var response = SendQuery<OnChainInfoResponse>(OnChainInfoRequest.BuildRequest(chainId), graphQlResponse =>
+        var response = SendQueryAsync<OnChainInfoResponse>(OnChainInfoRequest.BuildRequest(chainId))
+            .GetAwaiter()
+            .GetResult();
+
+        if (response.Data.Chains.Count == 0 || response.Data.Chains.First().ContractsOnChain == null)
         {
-            if (graphQlResponse.Data.Chains.Count == 0 || graphQlResponse.Data.Chains.First().ContractsOnChain == null)
+            throw Error.CHAIN_NOT_SUPPORTED.ToException(new
             {
-                throw Error.CHAIN_NOT_SUPPORTED.ToException(new
-                {
-                    ChainId = chainId
-                });
-            }
-        });
+                ChainId = chainId
+            });
+        }
 
         var chain = response.Data.Chains.First();
         var investedProvider = ExtractAddress(chain, ContractNames.InvestProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
@@ -55,33 +56,30 @@ public class StrapiClient : IStrapiClient
 
     public ProjectInfo ReceiveProjectInfo(string projectId, bool filterPhases)
     {
-        var response = SendQuery<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId, filterPhases), graphQlResponse =>
+        var response = SendQueryAsync<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId, filterPhases))
+            .GetAwaiter()
+            .GetResult();
+
+        if (response.Data.ProjectsInfo == null)
         {
-            if (graphQlResponse.Data.ProjectsInfo == null)
+            throw Error.PROJECT_PHASE_NOT_FOUND.ToException(new
             {
-                throw Error.PROJECT_PHASE_NOT_FOUND.ToException(new
-                {
-                    ProjectId = projectId
-                });
-            }
-        });
+                ProjectId = projectId
+            });
+        }
 
         return new ProjectInfo(response.Data);
     }
 
-    private GraphQLResponse<TResponse> SendQuery<TResponse>(GraphQLRequest request, Action<GraphQLResponse<TResponse>> notFoundHandlerFunc)
+    private async Task<GraphQLResponse<TResponse>> SendQueryAsync<TResponse>(GraphQLRequest request)
     {
-        var response = _client.SendQueryAsync<TResponse>(request)
-            .GetAwaiter()
-            .GetResult();
+        var response = await _client.SendQueryAsync<TResponse>(request);
 
         if (response.Errors != null && response.Errors.Length != 0)
         {
             var errorMessage = string.Join(Environment.NewLine, response.Errors.Select(x => x.Message));
             throw new InvalidOperationException(errorMessage);
         }
-
-        notFoundHandlerFunc.Invoke(response);
 
         return response;
     }

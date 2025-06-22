@@ -164,14 +164,15 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        var method = typeof(StrapiClient).GetMethod("SendQuery", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var method = typeof(StrapiClient).GetMethod("SendQueryAsync", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var generic = method.MakeGenericMethod(typeof(OnChainInfoResponse));
 
         void Act()
         {
             try
             {
-                generic.Invoke(client, new object[] { new GraphQLRequest(), (Action<GraphQLResponse<OnChainInfoResponse>>)(_ => { }) });
+                var task = (Task)generic.Invoke(client, new object[] { new GraphQLRequest() })!;
+                task.GetAwaiter().GetResult();
             }
             catch (TargetInvocationException ex)
             {
