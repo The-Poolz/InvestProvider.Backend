@@ -2,7 +2,7 @@
 
 namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IExistPhase : IHasPhaseId, IExistActivePhase
+public interface IExistPhase : IExistActivePhase
 {
-    public ComponentPhaseStartEndAmount Phase { get; set; }
+    ComponentPhaseStartEndAmount Phase { get; set; }
 }

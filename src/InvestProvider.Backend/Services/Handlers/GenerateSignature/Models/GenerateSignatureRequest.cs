@@ -46,4 +46,10 @@ public class GenerateSignatureRequest(string projectId, EthereumAddress userAddr
 
     [JsonIgnore]
     public ProjectsInformation DynamoDbProjectsInfo { get; set; } = null!;
+
+    [JsonIgnore]
+    public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
+
+    [JsonIgnore]
+    public long ChainId => StrapiProjectInfo.ChainId;
 }

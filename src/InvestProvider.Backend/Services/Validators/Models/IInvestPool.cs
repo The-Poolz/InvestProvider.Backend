@@ -1,3 +1,3 @@
 ﻿namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IInvestPool : IHasChainId, IHasPoolzBackId;
+public interface IInvestPool : IProjectContext, IHasPoolzBackId;

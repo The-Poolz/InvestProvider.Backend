@@ -2,8 +2,8 @@
 
 namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IExistActivePhase : IHasProjectId
+public interface IExistActivePhase : IProjectContext
 {
-    public bool FilterPhases { get; }
-    public ProjectInfo StrapiProjectInfo { get; set; }
+    bool FilterPhases { get; }
+    ProjectInfo StrapiProjectInfo { get; set; }
 }

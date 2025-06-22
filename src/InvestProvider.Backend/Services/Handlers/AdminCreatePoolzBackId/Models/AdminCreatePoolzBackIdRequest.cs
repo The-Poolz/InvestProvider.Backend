@@ -22,4 +22,7 @@ public class AdminCreatePoolzBackIdRequest :
 
     [JsonIgnore]
     public ProjectInfo StrapiProjectInfo { get; set; } = null!;
+
+    [JsonIgnore]
+    public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
 }

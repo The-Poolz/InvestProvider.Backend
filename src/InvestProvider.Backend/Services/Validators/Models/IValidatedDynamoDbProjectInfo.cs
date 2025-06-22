@@ -2,7 +2,7 @@
 
 namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IValidatedDynamoDbProjectInfo : IHasProjectId
+public interface IValidatedDynamoDbProjectInfo : IProjectContext
 {
-    public ProjectsInformation DynamoDbProjectsInfo { get; set; }
+    ProjectsInformation DynamoDbProjectsInfo { get; set; }
 }
