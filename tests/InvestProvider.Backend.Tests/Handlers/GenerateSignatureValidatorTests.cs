@@ -52,7 +52,7 @@ public class GenerateSignatureValidatorTests
                 It.IsAny<BigInteger>(),
                 It.IsAny<string>(),
                 It.IsAny<BlockParameter>()))
-                        .ReturnsAsync(new GetUserInvestsOutputDTO { ReturnValue1 = new List<UserInvest>() });
+                        .ReturnsAsync(new GetUserInvestsOutputDTO { ReturnValue1 = [] });
         erc20.Setup(x => x.GetOrAdd(It.IsAny<GetCacheRequest>()))
              .Returns(new ERC20DynamoDbTable { Decimals = (byte)18 });
     }
