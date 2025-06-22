@@ -15,7 +15,9 @@ public abstract class BasePhaseValidator<T>(IStrapiClient strapi, IDynamoDBConte
 
     protected bool NotNullCurrentPhase(IExistActivePhase model)
     {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
+        model.StrapiProjectInfo = _strapi.ReceiveProjectInfoAsync(model.ProjectId, filterPhases: model.FilterPhases)
+            .GetAwaiter()
+            .GetResult();
         return model.StrapiProjectInfo.CurrentPhase != null;
     }
 

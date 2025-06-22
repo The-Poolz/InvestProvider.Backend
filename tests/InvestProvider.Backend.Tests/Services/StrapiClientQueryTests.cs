@@ -48,7 +48,7 @@ public class StrapiClientQueryTests
     }
 
     [Fact]
-    public void ReceiveOnChainInfo_ReturnsInfo()
+    public async Task ReceiveOnChainInfoAsync_ReturnsInfo()
     {
         Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
 
@@ -80,7 +80,7 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        var result = client.ReceiveOnChainInfo(5);
+        var result = await client.ReceiveOnChainInfoAsync(5);
 
         Assert.Equal("http://rpc", result.RpcUrl);
         Assert.Equal("0x00000000000000000000000000000000000000aa", result.InvestedProvider.ToString());
@@ -88,7 +88,7 @@ public class StrapiClientQueryTests
     }
 
     [Fact]
-    public void ReceiveOnChainInfo_Throws_WhenChainMissing()
+    public async Task ReceiveOnChainInfoAsync_Throws_WhenChainMissing()
     {
         Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
         var gqlResponse = new GraphQLResponse<OnChainInfoResponse> { Data = new OnChainInfoResponse(Array.Empty<Chain>()) };
@@ -97,11 +97,11 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        Assert.Throws<ValidationException>(() => client.ReceiveOnChainInfo(7));
+        await Assert.ThrowsAsync<ValidationException>(() => client.ReceiveOnChainInfoAsync(7));
     }
 
     [Fact]
-    public void ReceiveProjectInfo_ReturnsInfo()
+    public async Task ReceiveProjectInfoAsync_ReturnsInfo()
     {
         Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
 
@@ -131,13 +131,13 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        var info = client.ReceiveProjectInfo("pid", false);
+        var info = await client.ReceiveProjectInfoAsync("pid", false);
         Assert.Equal(3, info.ChainId);
         Assert.Single(info.Phases);
     }
 
     [Fact]
-    public void ReceiveProjectInfo_Throws_WhenProjectMissing()
+    public async Task ReceiveProjectInfoAsync_Throws_WhenProjectMissing()
     {
         Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
         var gqlResponse = new GraphQLResponse<ProjectInfoResponse> { Data = new ProjectInfoResponse(null!) };
@@ -146,7 +146,7 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        Assert.Throws<ValidationException>(() => client.ReceiveProjectInfo("pid", true));
+        await Assert.ThrowsAsync<ValidationException>(() => client.ReceiveProjectInfoAsync("pid", true));
     }
 
     [Fact]
@@ -164,14 +164,15 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        var method = typeof(StrapiClient).GetMethod("SendQuery", BindingFlags.NonPublic | BindingFlags.Instance)!;
+        var method = typeof(StrapiClient).GetMethod("SendQueryAsync", BindingFlags.NonPublic | BindingFlags.Instance)!;
         var generic = method.MakeGenericMethod(typeof(OnChainInfoResponse));
 
         void Act()
         {
             try
             {
-                generic.Invoke(client, new object[] { new GraphQLRequest(), (Action<GraphQLResponse<OnChainInfoResponse>>)(_ => { }) });
+                var task = (Task)generic.Invoke(client, new object[] { new GraphQLRequest() })!;
+                task.GetAwaiter().GetResult();
             }
             catch (TargetInvocationException ex)
             {

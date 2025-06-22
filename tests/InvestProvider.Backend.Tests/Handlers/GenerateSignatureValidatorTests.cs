@@ -62,7 +62,7 @@ public class GenerateSignatureValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", It.IsAny<bool>())).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", It.IsAny<bool>())).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
@@ -91,7 +91,7 @@ public class GenerateSignatureValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", It.IsAny<bool>())).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", It.IsAny<bool>())).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         var start = (DateTime)((dynamic)phase).Start;

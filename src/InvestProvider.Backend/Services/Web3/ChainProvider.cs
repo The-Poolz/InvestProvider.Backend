@@ -39,7 +39,7 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>,
             .GetOrAdd(
                 chainId,
                 x => new Lazy<OnChainInfo>(
-                    () => strapi.ReceiveOnChainInfo(x),
+                    () => strapi.ReceiveOnChainInfoAsync(x).GetAwaiter().GetResult(),
                     LazyThreadSafetyMode.ExecutionAndPublication
                 )
             ).Value;

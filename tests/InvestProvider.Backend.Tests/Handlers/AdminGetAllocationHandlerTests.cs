@@ -28,7 +28,7 @@ public class AdminGetAllocationHandlerTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phases);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         var start1 = (DateTime)((dynamic)phase1).Start;
@@ -70,7 +70,7 @@ public class AdminGetAllocationHandlerTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phases);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         var start = (DateTime)((dynamic)phase).Start;
