@@ -46,4 +46,24 @@ public static class TestHelpers
         var projectInfoResponse = new ProjectInfoResponse((dynamic)projectsInfo);
         return new ProjectInfo(projectInfoResponse);
     }
+
+    public static ProjectInfo CreateProjectInfo(long chainId, IList phases)
+    {
+        var projectsInfoType = Type.GetType("Poolz.Finance.CSharp.Strapi.ProjectsInformation, Poolz.Finance.CSharp.Strapi")!;
+        var chainSettingType = Type.GetType("Poolz.Finance.CSharp.Strapi.ChainSetting, Poolz.Finance.CSharp.Strapi")!;
+        var chainType = Type.GetType("Poolz.Finance.CSharp.Strapi.Chain, Poolz.Finance.CSharp.Strapi")!;
+
+        var chain = Activator.CreateInstance(chainType)!;
+        chainType.GetProperty("ChainId")?.SetValue(chain, (long?)chainId);
+
+        var chainSetting = Activator.CreateInstance(chainSettingType)!;
+        chainSettingType.GetProperty("Chain")?.SetValue(chainSetting, chain);
+
+        var projectsInfo = Activator.CreateInstance(projectsInfoType)!;
+        projectsInfoType.GetProperty("ChainSetting")?.SetValue(projectsInfo, chainSetting);
+        projectsInfoType.GetProperty("ProjectPhases")?.SetValue(projectsInfo, phases);
+
+        var projectInfoResponse = new ProjectInfoResponse((dynamic)projectsInfo);
+        return new ProjectInfo(projectInfoResponse);
+    }
 }
