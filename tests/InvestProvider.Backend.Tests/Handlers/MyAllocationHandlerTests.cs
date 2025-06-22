@@ -5,9 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Moq;
+using FluentValidation;
+using InvestProvider.Backend.Services.Validators;
 using Xunit;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Handlers.MyAllocation;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
@@ -63,22 +64,20 @@ public class MyAllocationHandlerTests
         var phase = CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = CreateProjectInfo(1, phase);
 
-        var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
-
-        var dynamoDb = new Mock<IDynamoDBContext>();
         var projectData = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
-        dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
-                .ReturnsAsync(projectData);
 
         var address = new EthereumAddress("0x0000000000000000000000000000000000000123");
         var startTime = (DateTime)((dynamic)phase).Start;
         var whiteList = new WhiteList("pid", startTime, address, 10);
-        dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
-                .ReturnsAsync(whiteList);
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
-        var request = new MyAllocationRequest("pid", address);
+        var handler = new MyAllocationHandler();
+        var request = new MyAllocationRequest("pid", address)
+        {
+            StrapiProjectInfo = projectInfo,
+            Phase = (dynamic)phase,
+            DynamoDbProjectsInfo = projectData,
+            WhiteList = whiteList
+        };
 
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -94,20 +93,28 @@ public class MyAllocationHandlerTests
         var phase = CreatePhase("2", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = CreateProjectInfo(1, phase);
 
-        var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
-
         var dynamoDb = new Mock<IDynamoDBContext>();
         var projectData = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(projectData);
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<WhiteList>(null!));
+                .ReturnsAsync((WhiteList?)null);
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
-        var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
+        var handler = new MyAllocationHandler();
+        var validator = new MyAllocationValidator(
+            new DynamoDbProjectInfoValidator(dynamoDb.Object),
+            new ExistPhaseValidator(),
+            new WhiteListPhaseValidator(),
+            new WhiteListUserValidator(dynamoDb.Object)
+        );
 
-        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => handler.Handle(request, CancellationToken.None));
+        var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"))
+        {
+            StrapiProjectInfo = projectInfo,
+            Phase = (dynamic)phase
+        };
+
+        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => validator.ValidateAndThrowAsync(request, CancellationToken.None));
         Assert.Contains("User not in white list", ex.Message);
     }
 }
