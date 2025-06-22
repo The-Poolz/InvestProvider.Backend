@@ -10,7 +10,7 @@ namespace InvestProvider.Backend.Services.Handlers.MyUpcomingAllocation;
 public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
     : IRequestHandler<MyUpcomingAllocationRequest, ICollection<MyUpcomingAllocationResponse>>
 {
-    public async Task<ICollection<MyUpcomingAllocationResponse>> Handle(MyUpcomingAllocationRequest request, CancellationToken cancellationToken)
+    public async Task<ICollection<MyUpcomingAllocationResponse>> Handle(MyUpcomingAllocationRequest request, CancellationToken _)
     {
         var table = dynamoDb.GetTargetTable<WhiteList>();
         var whiteListTask = table.Query(new QueryOperationConfig 
@@ -28,9 +28,9 @@ public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
                     .Select((id, i) => new { k = $":p{i}", v = (DynamoDBEntry)id })
                     .ToDictionary(x => x.k, x => x.v)
             }
-        }).GetRemainingAsync(cancellationToken);
+        }).GetRemainingAsync(CancellationToken.None);
 
-        var projectInfoTask = dynamoDb.BatchLoadAsync<ProjectsInformation>(request.ProjectIDs, cancellationToken);
+        var projectInfoTask = dynamoDb.BatchLoadAsync<ProjectsInformation>(request.ProjectIDs);
 
         await Task.WhenAll(whiteListTask, projectInfoTask);
 

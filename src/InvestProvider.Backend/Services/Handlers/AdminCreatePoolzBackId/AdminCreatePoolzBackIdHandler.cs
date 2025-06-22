@@ -15,9 +15,9 @@ public class AdminCreatePoolzBackIdHandler(
 )
     : IRequestHandler<AdminCreatePoolzBackIdRequest, AdminCreatePoolzBackIdResponse>
 {
-    public async Task<AdminCreatePoolzBackIdResponse> Handle(AdminCreatePoolzBackIdRequest request, CancellationToken cancellationToken)
+    public async Task<AdminCreatePoolzBackIdResponse> Handle(AdminCreatePoolzBackIdRequest request, CancellationToken _)
     {
-        _ = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
+        strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
 
         var getFullData = await lockDealNFT.GetFullDataQueryAsync(request.ChainId, ContractType.LockDealNFT, request.PoolzBackId);
         if (getFullData.PoolInfo.Count != 2 ||
@@ -25,7 +25,7 @@ public class AdminCreatePoolzBackIdHandler(
             getFullData.PoolInfo[1].Name != ContractNames.DispenserProvider
         ) throw Error.INVALID_POOL_TYPE.ToException();
 
-        await dynamoDb.SaveAsync(request, cancellationToken);
+        await dynamoDb.SaveAsync(request);
 
         return new AdminCreatePoolzBackIdResponse(request);
     }

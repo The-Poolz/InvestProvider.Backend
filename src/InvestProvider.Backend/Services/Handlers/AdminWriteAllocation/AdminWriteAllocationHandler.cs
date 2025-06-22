@@ -14,9 +14,9 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb, IStrapiClien
     private const int BatchSize = 25;
     private const int MaxParallel = 10;
 
-    public async Task<AdminWriteAllocationResponse> Handle(AdminWriteAllocationRequest request, CancellationToken cancellationToken)
+    public async Task<AdminWriteAllocationResponse> Handle(AdminWriteAllocationRequest request, CancellationToken _)
     {
-        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId);
         if (dynamoProjectInfo == null) throw Error.POOLZ_BACK_ID_NOT_FOUND.ToException(new
         {
             request.ProjectId
@@ -33,10 +33,9 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb, IStrapiClien
         if (DateTime.UtcNow >= phase.Finish) throw Error.PHASE_FINISHED.ToException();
 
         var toSave = request.Users.Select(x => new WhiteList(request.ProjectId, phase.Start!.Value, x.UserAddress.ConvertToChecksumAddress(), x.Amount)).ToArray();
-        await Parallel.ForEachAsync(toSave.Chunk(BatchSize), new ParallelOptions 
+        await Parallel.ForEachAsync(toSave.Chunk(BatchSize), new ParallelOptions
             {
-                MaxDegreeOfParallelism = MaxParallel,
-                CancellationToken = cancellationToken
+                MaxDegreeOfParallelism = MaxParallel
             },
             body: async (chunk, ct) =>
             {

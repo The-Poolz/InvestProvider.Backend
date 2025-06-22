@@ -35,7 +35,7 @@ public class GenerateSignatureHandler(
 {
     public const byte MinInvestAmount = 1;
 
-    public async Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
+    public async Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken _)
     {
         var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: true);
         if (projectInfo.CurrentPhase == null)
@@ -46,7 +46,7 @@ public class GenerateSignatureHandler(
             });
         }
 
-        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId);
         if (dynamoProjectInfo == null)
         {
             throw Error.POOLZ_BACK_ID_NOT_FOUND.ToException(new
@@ -81,7 +81,7 @@ public class GenerateSignatureHandler(
 
         if (projectInfo.CurrentPhase.MaxInvest == 0)
         {
-            var whiteList = await dynamoDb.LoadAsync<WhiteList>(WhiteList.CalculateHashId(request.ProjectId, projectInfo.CurrentPhase.Start!.Value), request.UserAddress.Address, cancellationToken);
+            var whiteList = await dynamoDb.LoadAsync<WhiteList>(WhiteList.CalculateHashId(request.ProjectId, projectInfo.CurrentPhase.Start!.Value), request.UserAddress.Address, CancellationToken.None);
             if (whiteList == null) throw Error.USER_NOT_FOUND.ToException();
             ValidateWhiteList(whiteList, amount, investAmounts);
         }

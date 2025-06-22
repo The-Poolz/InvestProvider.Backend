@@ -13,7 +13,7 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
 {
     public int MaxParallel = 10;
 
-    public async Task<ICollection<AdminGetAllocationResponse>> Handle(AdminGetAllocationRequest request, CancellationToken cancellationToken)
+    public async Task<ICollection<AdminGetAllocationResponse>> Handle(AdminGetAllocationRequest request, CancellationToken _)
     {
         var projectInfo = strapi.ReceiveProjectInfo(request.ProjectId, filterPhases: false);
 
@@ -22,11 +22,11 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
         var whiteLists = new ConcurrentBag<AdminGetAllocationResponse>();
         var tasks = whiteListPhases.Select(async phase =>
         {
-            await throttler.WaitAsync(cancellationToken);
+            await throttler.WaitAsync();
             try
             {
                 var search = dynamoDb.QueryAsync<WhiteList>(WhiteList.CalculateHashId(request.ProjectId, phase.Start!.Value));
-                var entities = await search.GetRemainingAsync(cancellationToken);
+                var entities = await search.GetRemainingAsync(CancellationToken.None);
                 whiteLists.Add(new AdminGetAllocationResponse(
                     phaseId: phase.Id,
                     whiteList: entities.Select(x => new UserWithAmount(x.UserAddress, x.Amount)).ToArray()

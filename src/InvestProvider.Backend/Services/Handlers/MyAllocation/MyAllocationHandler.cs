@@ -10,9 +10,9 @@ namespace InvestProvider.Backend.Services.Handlers.MyAllocation;
 public class MyAllocationHandler(IStrapiClient strapi, IDynamoDBContext dynamoDb)
     : IRequestHandler<MyAllocationRequest, MyAllocationResponse>
 {
-    public async Task<MyAllocationResponse> Handle(MyAllocationRequest request, CancellationToken cancellationToken)
+    public async Task<MyAllocationResponse> Handle(MyAllocationRequest request, CancellationToken _)
     {
-        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId, cancellationToken);
+        var dynamoProjectInfo = await dynamoDb.LoadAsync<ProjectsInformation>(request.ProjectId);
         if (dynamoProjectInfo == null) throw Error.POOLZ_BACK_ID_NOT_FOUND.ToException(new
         {
             request.ProjectId
@@ -32,7 +32,7 @@ public class MyAllocationHandler(IStrapiClient strapi, IDynamoDBContext dynamoDb
         var whiteList = await dynamoDb.LoadAsync<WhiteList>(
             hashKey: WhiteList.CalculateHashId(request.ProjectId, projectInfo.CurrentPhase.Start!.Value),
             rangeKey: request.UserAddress.Address,
-            cancellationToken
+            CancellationToken.None
         );
         if (whiteList == null) throw Error.NOT_IN_WHITE_LIST.ToException(new
         {
