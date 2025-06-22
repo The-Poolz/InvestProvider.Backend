@@ -1,3 +1,6 @@
 ﻿namespace InvestProvider.Backend.Services.Validators.Models;
 
-public interface IInvestPool : IProjectContext, IHasPoolzBackId;
+public interface IInvestPool : IProjectContext
+{
+    public long PoolzBackId { get; }
+}
