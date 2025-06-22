@@ -35,9 +35,7 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>,
         };
     }
 
-    private OnChainInfo FetchChainInfo(long chainId)
-    {
-        return ChainsInfo
+    private OnChainInfo FetchChainInfo(long chainId) => ChainsInfo
             .GetOrAdd(
                 chainId,
                 x => new Lazy<OnChainInfo>(
@@ -45,5 +43,4 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>,
                     LazyThreadSafetyMode.ExecutionAndPublication
                 )
             ).Value;
-    }
 }

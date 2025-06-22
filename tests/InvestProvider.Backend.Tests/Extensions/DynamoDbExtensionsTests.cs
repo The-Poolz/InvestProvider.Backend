@@ -1,6 +1,5 @@
 using System.Threading;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
 using Moq;
 using Xunit;
@@ -24,7 +23,7 @@ public class DynamoDbExtensionsTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("k2", It.IsAny<CancellationToken>()))
             .ReturnsAsync(item2);
 
-        var result = await dynamoDb.Object.BatchLoadAsync<ProjectsInformation>(keys, CancellationToken.None);
+        var result = await dynamoDb.Object.BatchLoadAsync<ProjectsInformation>(keys);
 
         Assert.Equal(new[] { item1, item2 }, result);
         dynamoDb.Verify(x => x.LoadAsync<ProjectsInformation>("k1", It.IsAny<CancellationToken>()), Times.Once);

@@ -30,7 +30,7 @@ public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
             }
         }).GetRemainingAsync(cancellationToken);
 
-        var projectInfoTask = dynamoDb.BatchLoadAsync<ProjectsInformation>(request.ProjectIDs, cancellationToken);
+        var projectInfoTask = dynamoDb.BatchLoadAsync<ProjectsInformation>(request.ProjectIDs);
 
         await Task.WhenAll(whiteListTask, projectInfoTask);
 
