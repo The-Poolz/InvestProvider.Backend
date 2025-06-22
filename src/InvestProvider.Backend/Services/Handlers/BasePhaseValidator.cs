@@ -1,4 +1,5 @@
 using FluentValidation;
+using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.DynamoDb.Models;
@@ -47,5 +48,22 @@ public abstract class BasePhaseValidator<T> : AbstractValidator<T>
             token
         );
         return model.WhiteList != null;
+    }
+
+    protected static IRuleBuilderOptions<TModel, TModel> WhiteListPhaseRules<TModel>(BasePhaseValidator<TModel> validator)
+        where TModel : IExistPhase, IValidatedDynamoDbProjectInfo
+    {
+        return validator.RuleFor(x => x)
+            .Cascade(CascadeMode.Stop)
+            .MustAsync((m, ct) => validator.NotNullProjectsInformationAsync(m, ct))
+            .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId })
+            .Must(m => validator.NotNullCurrentPhase(m))
+            .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
+            .Must(m => SetPhase(m))
+            .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
+            .Must(x => DateTime.UtcNow < x.Phase.Finish)
+            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow })
+            .Must(x => x.Phase.MaxInvest == 0)
+            .WithError(Error.PHASE_IS_NOT_WHITELIST);
     }
 }
