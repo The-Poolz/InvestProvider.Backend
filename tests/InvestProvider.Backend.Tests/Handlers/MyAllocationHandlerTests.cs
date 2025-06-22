@@ -1,13 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
 using Moq;
 using Xunit;
-using FluentValidation;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
