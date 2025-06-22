@@ -48,25 +48,13 @@ jobs:
         run: |
           mkdir -p ./.sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-      - name: Install ReportGenerator
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
       - name: Build, Test and Analyze
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-       
+
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"The-Poolz_InvestProvider.Backend" /o:"the-poolz" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.cobertura.reportsPaths="**/coverage.cobertura.xml" /d:sonar.scanner.scanAll=false
           dotnet restore
           dotnet build --no-restore
           dotnet test --no-build --collect:"XPlat Code Coverage"
-          reportgenerator "-reports:**/coverage.cobertura.xml;" "-targetdir:${{github.workspace}}/report" "-reporttypes:MarkdownSummaryGithub"
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
-      - name: Comment coverage report
-        if: github.event_name == 'pull_request'
-        uses: marocchino/sticky-pull-request-comment@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          recreate: true
-          header: Coverage Report
-          path: ${{github.workspace}}/report/SummaryGithub.md
