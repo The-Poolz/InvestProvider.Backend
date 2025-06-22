@@ -26,7 +26,7 @@ public class AdminCreatePoolzBackIdValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
         var poolInfo = new List<BasePoolInfo>
@@ -57,7 +57,7 @@ public class AdminCreatePoolzBackIdValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
         var poolInfo = new List<BasePoolInfo>

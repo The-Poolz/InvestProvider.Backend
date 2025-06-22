@@ -1,9 +1,10 @@
-﻿using InvestProvider.Backend.Services.Strapi.Models;
+﻿using System.Threading.Tasks;
+using InvestProvider.Backend.Services.Strapi.Models;
 
 namespace InvestProvider.Backend.Services.Strapi;
 
 public interface IStrapiClient
 {
-    public OnChainInfo ReceiveOnChainInfo(long chainId);
-    public ProjectInfo ReceiveProjectInfo(string projectId, bool filterPhases);
+    Task<OnChainInfo> ReceiveOnChainInfoAsync(long chainId);
+    Task<ProjectInfo> ReceiveProjectInfoAsync(string projectId, bool filterPhases);
 }

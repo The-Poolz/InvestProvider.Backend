@@ -1,6 +1,7 @@
 ﻿using GraphQL;
 using GraphQL.Client.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Net.Web3.EthereumWallet;
 using Poolz.Finance.CSharp.Strapi;
 using EnvironmentManager.Extensions;
@@ -33,11 +34,9 @@ public class StrapiClient : IStrapiClient
         }
     );
 
-    public OnChainInfo ReceiveOnChainInfo(long chainId)
+    public async Task<OnChainInfo> ReceiveOnChainInfoAsync(long chainId)
     {
-        var response = SendQueryAsync<OnChainInfoResponse>(OnChainInfoRequest.BuildRequest(chainId))
-            .GetAwaiter()
-            .GetResult();
+        var response = await SendQueryAsync<OnChainInfoResponse>(OnChainInfoRequest.BuildRequest(chainId));
 
         if (response.Data.Chains.Count == 0 || response.Data.Chains.First().ContractsOnChain == null)
         {
@@ -54,11 +53,9 @@ public class StrapiClient : IStrapiClient
         return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
     }
 
-    public ProjectInfo ReceiveProjectInfo(string projectId, bool filterPhases)
+    public async Task<ProjectInfo> ReceiveProjectInfoAsync(string projectId, bool filterPhases)
     {
-        var response = SendQueryAsync<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId, filterPhases))
-            .GetAwaiter()
-            .GetResult();
+        var response = await SendQueryAsync<ProjectInfoResponse>(ProjectPhaseRequest.BuildRequest(projectId, filterPhases));
 
         if (response.Data.ProjectsInfo == null)
         {

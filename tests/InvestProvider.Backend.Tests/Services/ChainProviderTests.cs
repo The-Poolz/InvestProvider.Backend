@@ -16,12 +16,12 @@ public class ChainProviderTests
     {
         var info = new OnChainInfo("http://rpc", new EthereumAddress("0x00000000000000000000000000000000000000aa"), new EthereumAddress("0x00000000000000000000000000000000000000bb"));
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveOnChainInfo(1)).Returns(info);
+        strapi.Setup(x => x.ReceiveOnChainInfoAsync(1)).ReturnsAsync(info);
         var provider = new ChainProvider(strapi.Object);
 
         Assert.Equal("http://rpc", provider.RpcUrl(1));
         Assert.Equal("http://rpc", provider.RpcUrl(1));
-        strapi.Verify(x => x.ReceiveOnChainInfo(1), Times.Once);
+        strapi.Verify(x => x.ReceiveOnChainInfoAsync(1), Times.Once);
     }
 
     [Fact]
@@ -29,7 +29,7 @@ public class ChainProviderTests
     {
         var info = new OnChainInfo("url", new EthereumAddress("0x00000000000000000000000000000000000000aa"), new EthereumAddress("0x00000000000000000000000000000000000000bb"));
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveOnChainInfo(3)).Returns(info);
+        strapi.Setup(x => x.ReceiveOnChainInfoAsync(3)).ReturnsAsync(info);
         var provider = new ChainProvider(strapi.Object);
 
         Assert.Equal("0x00000000000000000000000000000000000000aa", provider.ContractAddress(3, ContractType.InvestedProvider));
@@ -41,7 +41,7 @@ public class ChainProviderTests
     {
         var info = new OnChainInfo("url", new EthereumAddress("0x00000000000000000000000000000000000000aa"), new EthereumAddress("0x00000000000000000000000000000000000000bb"));
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveOnChainInfo(4)).Returns(info);
+        strapi.Setup(x => x.ReceiveOnChainInfoAsync(4)).ReturnsAsync(info);
         var provider = new ChainProvider(strapi.Object);
 
         Assert.ThrowsAny<Exception>(() => provider.ContractAddress(4, (ContractType)99));

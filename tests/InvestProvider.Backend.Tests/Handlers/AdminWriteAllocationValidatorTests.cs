@@ -27,7 +27,7 @@ public class AdminWriteAllocationValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phasesList);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
@@ -47,7 +47,7 @@ public class AdminWriteAllocationValidatorTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, emptyList);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
