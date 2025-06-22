@@ -13,13 +13,13 @@ public class MyUpcomingAllocationHandler(IDynamoDBContext dynamoDb)
     public async Task<ICollection<MyUpcomingAllocationResponse>> Handle(MyUpcomingAllocationRequest request, CancellationToken cancellationToken)
     {
         var table = dynamoDb.GetTargetTable<WhiteList>();
-        var whiteListTask = table.Query(new QueryOperationConfig 
+        var whiteListTask = table.Query(new QueryOperationConfig
         {
             IndexName = "UserAddress-index",
             KeyExpression = new Expression
             {
                 ExpressionStatement = "UserAddress = :ua",
-                ExpressionAttributeValues  = new Dictionary<string, DynamoDBEntry> { [":ua"] = request.UserAddress.Address }
+                ExpressionAttributeValues = new Dictionary<string, DynamoDBEntry> { [":ua"] = request.UserAddress.Address }
             },
             FilterExpression = new Expression
             {

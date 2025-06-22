@@ -37,7 +37,7 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
                 throttler.Release();
             }
         });
-        
+
         await Task.WhenAll(tasks);
 
         return whiteLists.ToArray();

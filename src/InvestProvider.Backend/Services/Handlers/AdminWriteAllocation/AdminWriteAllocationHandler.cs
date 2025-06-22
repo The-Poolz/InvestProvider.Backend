@@ -15,11 +15,11 @@ public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb)
     public async Task<AdminWriteAllocationResponse> Handle(AdminWriteAllocationRequest request, CancellationToken cancellationToken)
     {
         var toSave = request.Users.Select(x => new WhiteList(request.ProjectId, request.PhaseContext.Phase.Start!.Value, x.UserAddress.ConvertToChecksumAddress(), x.Amount)).ToArray();
-        await Parallel.ForEachAsync(toSave.Chunk(BatchSize), new ParallelOptions 
-            {
-                MaxDegreeOfParallelism = MaxParallel,
-                CancellationToken = cancellationToken
-            },
+        await Parallel.ForEachAsync(toSave.Chunk(BatchSize), new ParallelOptions
+        {
+            MaxDegreeOfParallelism = MaxParallel,
+            CancellationToken = cancellationToken
+        },
             body: async (chunk, ct) =>
             {
                 var batch = dynamoDb.CreateBatchWrite<WhiteList>();
