@@ -37,7 +37,7 @@ public class StrapiClient : IStrapiClient
     {
         var response = SendQuery<OnChainInfoResponse>(OnChainInfoRequest.BuildRequest(chainId), graphQlResponse =>
         {
-            if (!graphQlResponse.Data.Chains.Any() || graphQlResponse.Data.Chains.First().ContractsOnChain == null)
+            if (graphQlResponse.Data.Chains.Count == 0 || graphQlResponse.Data.Chains.First().ContractsOnChain == null)
             {
                 throw Error.CHAIN_NOT_SUPPORTED.ToException(new
                 {
@@ -75,7 +75,7 @@ public class StrapiClient : IStrapiClient
             .GetAwaiter()
             .GetResult();
 
-        if (response.Errors != null && response.Errors.Any())
+        if (response.Errors != null && response.Errors.Length != 0)
         {
             var errorMessage = string.Join(Environment.NewLine, response.Errors.Select(x => x.Message));
             throw new InvalidOperationException(errorMessage);
@@ -91,10 +91,11 @@ public class StrapiClient : IStrapiClient
         var contract = chain.ContractsOnChain.Contracts.FirstOrDefault(x =>
             x.ContractVersion.NameVersion.Contains(nameOfContract)
         );
-        if (contract == null) throw notFoundError.ToException(new
+        return contract == null
+            ? throw notFoundError.ToException(new
         {
             chain.ChainId
-        });
-        return contract.Address;
+        })
+            : (EthereumAddress)contract.Address;
     }
 }
