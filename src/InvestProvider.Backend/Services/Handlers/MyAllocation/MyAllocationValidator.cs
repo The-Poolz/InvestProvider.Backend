@@ -17,5 +17,4 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
             .MustAsync(NotNullWhiteListAsync)
             .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
-
 }
