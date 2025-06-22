@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using MediatR.Extensions.FluentValidation.AspNetCore;
 
@@ -11,9 +10,5 @@ public static class ServiceCollectionExtensions
         .AddMediatR(x => x.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()));
 
     public static IServiceCollection AddValidators(this IServiceCollection serviceCollection) => serviceCollection
-        .AddMediatrRequestValidators();
-
-    private static IServiceCollection AddMediatrRequestValidators(this IServiceCollection serviceCollection) =>
-        serviceCollection.AddFluentValidation([Assembly.GetExecutingAssembly()]);
-
+        .AddFluentValidation([Assembly.GetExecutingAssembly()]);
 }
