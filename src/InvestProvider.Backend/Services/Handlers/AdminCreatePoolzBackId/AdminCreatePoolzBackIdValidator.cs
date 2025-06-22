@@ -1,23 +1,23 @@
 using FluentValidation;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
+using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using poolz.finance.csharp.contracts.LockDealNFT;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId;
 
-public class AdminCreatePoolzBackIdValidator : AbstractValidator<AdminCreatePoolzBackIdRequest>
+public class AdminCreatePoolzBackIdValidator : BasePhaseValidator<AdminCreatePoolzBackIdRequest>
 {
-    private readonly IStrapiClient _strapi;
     private readonly ILockDealNFTService<ContractType> _lockDealNFT;
 
     public AdminCreatePoolzBackIdValidator(
         IStrapiClient strapi,
+        IDynamoDBContext dynamoDb,
         ILockDealNFTService<ContractType> lockDealNFT
-    )
+    ) : base(strapi, dynamoDb)
     {
-        _strapi = strapi;
         _lockDealNFT = lockDealNFT;
 
         ClassLevelCascadeMode = CascadeMode.Stop;
@@ -34,9 +34,4 @@ public class AdminCreatePoolzBackIdValidator : AbstractValidator<AdminCreatePool
             .WithError(Error.INVALID_POOL_TYPE);
     }
 
-    private bool NotNullCurrentPhase(AdminCreatePoolzBackIdRequest model)
-    {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
-        return model.StrapiProjectInfo.CurrentPhase != null;
-    }
 }

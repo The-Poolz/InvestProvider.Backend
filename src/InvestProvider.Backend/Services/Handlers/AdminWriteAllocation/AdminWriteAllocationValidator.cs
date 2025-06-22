@@ -3,19 +3,15 @@ using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
-using InvestProvider.Backend.Services.DynamoDb.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 
-public class AdminWriteAllocationValidator : AbstractValidator<AdminWriteAllocationRequest>
+public class AdminWriteAllocationValidator : BasePhaseValidator<AdminWriteAllocationRequest>
 {
-    private readonly IStrapiClient _strapi;
-    private readonly IDynamoDBContext _dynamoDb;
 
     public AdminWriteAllocationValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
+        : base(strapi, dynamoDb)
     {
-        _strapi = strapi;
-        _dynamoDb = dynamoDb;
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
@@ -33,22 +29,4 @@ public class AdminWriteAllocationValidator : AbstractValidator<AdminWriteAllocat
             .WithError(Error.PHASE_IS_NOT_WHITELIST);
     }
 
-    private bool NotNullCurrentPhase(AdminWriteAllocationRequest model)
-    {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
-        return model.StrapiProjectInfo.CurrentPhase != null;
-    }
-
-    private async Task<bool> NotNullProjectsInformationAsync(AdminWriteAllocationRequest model, CancellationToken token)
-    {
-        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token);
-        return model.DynamoDbProjectsInfo != null;
-    }
-
-    private bool SetPhase(AdminWriteAllocationRequest model)
-    {
-        var phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId);
-        model.Phase = phase!;
-        return phase != null;
-    }
 }

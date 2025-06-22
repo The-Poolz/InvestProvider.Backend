@@ -3,19 +3,14 @@ using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
-using InvestProvider.Backend.Services.DynamoDb.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.MyAllocation;
 
-public class MyAllocationValidator : AbstractValidator<MyAllocationRequest>
+public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
 {
-    private readonly IStrapiClient _strapi;
-    private readonly IDynamoDBContext _dynamoDb;
-
     public MyAllocationValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
+        : base(strapi, dynamoDb)
     {
-        _strapi = strapi;
-        _dynamoDb = dynamoDb;
 
         ClassLevelCascadeMode = CascadeMode.Stop;
 
@@ -35,32 +30,4 @@ public class MyAllocationValidator : AbstractValidator<MyAllocationRequest>
             .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
 
-    private bool NotNullCurrentPhase(MyAllocationRequest model)
-    {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
-        return model.StrapiProjectInfo.CurrentPhase != null;
-    }
-
-    private async Task<bool> NotNullProjectsInformationAsync(MyAllocationRequest model, CancellationToken token)
-    {
-        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token);
-        return model.DynamoDbProjectsInfo != null;
-    }
-
-    private bool SetPhase(MyAllocationRequest model)
-    {
-        var phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId);
-        model.Phase = phase!;
-        return phase != null;
-    }
-
-    private async Task<bool> NotNullWhiteListAsync(MyAllocationRequest model, CancellationToken token)
-    {
-        model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
-            hashKey: WhiteList.CalculateHashId(model.ProjectId, model.StrapiProjectInfo.CurrentPhase!.Start!.Value),
-            rangeKey: model.UserAddress.Address,
-            token
-        );
-        return model.WhiteList != null;
-    }
 }
