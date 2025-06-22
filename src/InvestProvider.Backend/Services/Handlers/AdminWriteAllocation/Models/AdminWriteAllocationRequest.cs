@@ -5,7 +5,8 @@ using InvestProvider.Backend.Services.Validators;
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
 public class AdminWriteAllocationRequest(string projectId, string phaseId, ICollection<UserWithAmount> users) :
-    IRequest<AdminWriteAllocationResponse>
+    IRequest<AdminWriteAllocationResponse>,
+    IPhaseRequest
 {
     [JsonRequired]
     public string ProjectId { get; } = projectId;

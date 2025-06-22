@@ -7,7 +7,8 @@ namespace InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
 
 [method: JsonConstructor]
 public class MyAllocationRequest(string projectId, EthereumAddress userAddress) :
-    IRequest<MyAllocationResponse>
+    IRequest<MyAllocationResponse>,
+    IUserPhaseRequest
 {
     [JsonRequired]
     public string ProjectId { get; } = projectId;

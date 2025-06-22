@@ -8,7 +8,8 @@ namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models
 
 public class AdminCreatePoolzBackIdRequest :
     ProjectsInformation,
-    IRequest<AdminCreatePoolzBackIdResponse>
+    IRequest<AdminCreatePoolzBackIdResponse>,
+    IPhaseRequest
 {
     [JsonRequired]
     [DynamoDBIgnore]

@@ -1,20 +1,18 @@
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
-using Amazon.DynamoDBv2.DataModel;
-using InvestProvider.Backend.Services.Strapi;
-using DynamoProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
-using InvestProvider.Backend.Services.DynamoDb.Models;
-using Net.Web3.EthereumWallet;
-using InvestProvider.Backend.Services.Validators;
-using System.Collections.Generic;
-using Poolz.Finance.CSharp.Strapi;
+    where T : IPhaseRequest
+        model.PhaseContext.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
+        return model.PhaseContext.StrapiProjectInfo.CurrentPhase != null;
+        model.PhaseContext.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<DynamoProjectsInformation>(model.ProjectId, token);
+        return model.PhaseContext.DynamoDbProjectsInfo != null;
+        var phase = ((IEnumerable<ComponentPhaseStartEndAmount>)model.PhaseContext.StrapiProjectInfo.Phases)
+            .FirstOrDefault(p => p.Id == model.PhaseId);
+        model.PhaseContext.Phase = phase!;
 
-namespace InvestProvider.Backend.Services.Handlers;
-
-public abstract class BasePhaseValidator<T> : AbstractValidator<T>
-{
-    protected readonly IStrapiClient _strapi;
-    protected readonly IDynamoDBContext _dynamoDb;
+    protected async Task<bool> NotNullWhiteListAsync(IUserPhaseRequest model, CancellationToken token)
+        model.PhaseContext.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
+            WhiteList.CalculateHashId(model.ProjectId, model.PhaseContext.StrapiProjectInfo.CurrentPhase!.Start!.Value),
+            model.UserAddress.Address,
+        return model.PhaseContext.WhiteList != null;
 
     protected BasePhaseValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
     {
