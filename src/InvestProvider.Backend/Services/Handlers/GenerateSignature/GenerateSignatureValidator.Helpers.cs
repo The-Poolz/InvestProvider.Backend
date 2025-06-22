@@ -13,7 +13,6 @@ public partial class GenerateSignatureRequestValidator
 {
     private readonly byte _minInvestAmount = Env.MIN_INVEST_AMOUNT.GetOrDefault<byte>(1);
 
-
     private async Task<bool> MustMoreThanAllowedMinimumAsync(GenerateSignatureRequest model, CancellationToken _)
     {
         var tokenAddress = await _lockDealNFT.TokenOfQueryAsync(
