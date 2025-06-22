@@ -18,21 +18,34 @@ public abstract class BasePhaseValidator<T> : AbstractValidator<T>
         _dynamoDb = dynamoDb;
     }
 
-    protected bool NotNullCurrentPhase(IExistActivePhase model) =>
-        (model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases)).CurrentPhase != null;
+    protected bool NotNullCurrentPhase(IExistActivePhase model)
+    {
+        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
+        return model.StrapiProjectInfo.CurrentPhase != null;
+    }
 
     protected async Task<bool> NotNullProjectsInformationAsync<TModel>(TModel model, CancellationToken token)
-        where TModel : IValidatedDynamoDbProjectInfo =>
-        (model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token)) != null;
+        where TModel : IValidatedDynamoDbProjectInfo
+    {
+        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token);
+        return model.DynamoDbProjectsInfo != null;
+    }
 
-    protected bool SetPhase(IExistPhase model) =>
-        (model.Phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId)) != null;
+    protected static bool SetPhase(IExistPhase model)
+    {
+        var phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId);
+        model.Phase = phase!;
+        return phase != null;
+    }
 
     protected async Task<bool> NotNullWhiteListAsync<TModel>(TModel model, CancellationToken token)
-        where TModel : IWhiteListUser =>
-        (model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
+        where TModel : IWhiteListUser
+    {
+        model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
             hashKey: WhiteList.CalculateHashId(model.ProjectId, model.StrapiProjectInfo.CurrentPhase!.Start!.Value),
             rangeKey: model.UserAddress.Address,
             token
-        )) != null;
+        );
+        return model.WhiteList != null;
+    }
 }
