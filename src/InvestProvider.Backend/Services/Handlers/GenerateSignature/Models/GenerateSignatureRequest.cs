@@ -1,19 +1,13 @@
 ﻿using MediatR;
 using Newtonsoft.Json;
 using Net.Web3.EthereumWallet;
-using InvestProvider.Backend.Services.Strapi.Models;
-using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
-using InvestProvider.Backend.Services.Web3.Contracts.Models;
+using InvestProvider.Backend.Services.Validators;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 [method: JsonConstructor]
 public class GenerateSignatureRequest(string projectId, EthereumAddress userAddress, string weiAmount) :
-    IRequest<GenerateSignatureResponse>,
-    IFcfsSignature,
-    IWhiteListSignature,
-    IWhiteListUser
+    IRequest<GenerateSignatureResponse>
 {
     [JsonRequired]
     public string ProjectId { get; } = projectId;
@@ -28,29 +22,11 @@ public class GenerateSignatureRequest(string projectId, EthereumAddress userAddr
     public bool FilterPhases => true;
 
     [JsonIgnore]
-    public decimal Amount { get; set; }
+    public PhaseValidationContext PhaseContext { get; } = new();
 
     [JsonIgnore]
-    public byte TokenDecimals { get; set; }
+    public string PhaseId => PhaseContext.StrapiProjectInfo.CurrentPhase!.Id;
 
     [JsonIgnore]
-    public UserInvestments[] UserInvestments { get; set; } = null!;
-
-    [JsonIgnore]
-    public decimal InvestedAmount { get; set; }
-
-    [JsonIgnore]
-    public ProjectInfo StrapiProjectInfo { get; set; } = null!;
-
-    [JsonIgnore]
-    public WhiteList WhiteList { get; set; } = null!;
-
-    [JsonIgnore]
-    public ProjectsInformation DynamoDbProjectsInfo { get; set; } = null!;
-
-    [JsonIgnore]
-    public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
-
-    [JsonIgnore]
-    public long ChainId => StrapiProjectInfo.ChainId;
+    public long ChainId => PhaseContext.StrapiProjectInfo.ChainId;
 }

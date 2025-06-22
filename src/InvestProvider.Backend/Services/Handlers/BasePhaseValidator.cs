@@ -1,13 +1,16 @@
 using FluentValidation;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi;
+using DynamoProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
+using Net.Web3.EthereumWallet;
+using InvestProvider.Backend.Services.Validators;
+using System.Collections.Generic;
+using Poolz.Finance.CSharp.Strapi;
 
 namespace InvestProvider.Backend.Services.Handlers;
 
 public abstract class BasePhaseValidator<T> : AbstractValidator<T>
-    where T : IExistActivePhase
 {
     protected readonly IStrapiClient _strapi;
     protected readonly IDynamoDBContext _dynamoDb;
@@ -18,34 +21,36 @@ public abstract class BasePhaseValidator<T> : AbstractValidator<T>
         _dynamoDb = dynamoDb;
     }
 
-    protected bool NotNullCurrentPhase(IExistActivePhase model)
+    protected bool NotNullCurrentPhase(T model)
     {
-        model.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
-        return model.StrapiProjectInfo.CurrentPhase != null;
+        dynamic m = model;
+        m.PhaseContext.StrapiProjectInfo = _strapi.ReceiveProjectInfo(m.ProjectId, filterPhases: m.FilterPhases);
+        return m.PhaseContext.StrapiProjectInfo.CurrentPhase != null;
     }
 
-    protected async Task<bool> NotNullProjectsInformationAsync<TModel>(TModel model, CancellationToken token)
-        where TModel : IValidatedDynamoDbProjectInfo
+    protected async Task<bool> NotNullProjectsInformationAsync(T model, CancellationToken token)
     {
-        model.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<ProjectsInformation>(model.ProjectId, token);
-        return model.DynamoDbProjectsInfo != null;
+        dynamic m = model;
+        m.PhaseContext.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<DynamoProjectsInformation>(m.ProjectId, token);
+        return m.PhaseContext.DynamoDbProjectsInfo != null;
     }
 
-    protected static bool SetPhase(IExistPhase model)
+    protected static bool SetPhase(T model)
     {
-        var phase = model.StrapiProjectInfo.Phases.FirstOrDefault(p => p.Id == model.PhaseId);
-        model.Phase = phase!;
+        dynamic m = model;
+        var phase = ((IEnumerable<ComponentPhaseStartEndAmount>)m.PhaseContext.StrapiProjectInfo.Phases).FirstOrDefault(p => p.Id == m.PhaseId);
+        m.PhaseContext.Phase = phase!;
         return phase != null;
     }
 
-    protected async Task<bool> NotNullWhiteListAsync<TModel>(TModel model, CancellationToken token)
-        where TModel : IWhiteListUser
+    protected async Task<bool> NotNullWhiteListAsync(T model, CancellationToken token)
     {
-        model.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
-            hashKey: WhiteList.CalculateHashId(model.ProjectId, model.StrapiProjectInfo.CurrentPhase!.Start!.Value),
-            rangeKey: model.UserAddress.Address,
+        dynamic m = model;
+        m.PhaseContext.WhiteList = await _dynamoDb.LoadAsync<WhiteList>(
+            WhiteList.CalculateHashId(m.ProjectId, m.PhaseContext.StrapiProjectInfo.CurrentPhase!.Start!),
+            ((EthereumAddress)m.UserAddress).Address,
             token
         );
-        return model.WhiteList != null;
+        return m.PhaseContext.WhiteList != null;
     }
 }

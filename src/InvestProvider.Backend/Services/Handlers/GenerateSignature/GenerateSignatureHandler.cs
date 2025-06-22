@@ -18,21 +18,21 @@ public class GenerateSignatureHandler(
     {
         var signature = signatureGenerator.GenerateSignature(
             new Eip712Domain(
-                chainId: request.StrapiProjectInfo.ChainId,
-                verifyingContract: chainProvider.ContractAddress(request.StrapiProjectInfo.ChainId, ContractType.InvestedProvider)
+                chainId: request.PhaseContext.StrapiProjectInfo.ChainId,
+                verifyingContract: chainProvider.ContractAddress(request.PhaseContext.StrapiProjectInfo.ChainId, ContractType.InvestedProvider)
             ),
             new InvestMessage(
-                poolId: request.DynamoDbProjectsInfo.PoolzBackId,
+                poolId: request.PhaseContext.DynamoDbProjectsInfo.PoolzBackId,
                 userAddress: request.UserAddress,
-                amount: UnitConversion.Convert.ToWei(request.Amount, request.TokenDecimals),
-                validUntil: request.StrapiProjectInfo.CurrentPhase!.Finish!.Value,
-                nonce: request.UserInvestments.Length
+                amount: UnitConversion.Convert.ToWei(request.PhaseContext.Amount, request.PhaseContext.TokenDecimals),
+                validUntil: request.PhaseContext.StrapiProjectInfo.CurrentPhase!.Finish!.Value,
+                nonce: request.PhaseContext.UserInvestments.Length
             )
         );
 
         return Task.FromResult(new GenerateSignatureResponse(signature,
-            request.StrapiProjectInfo.CurrentPhase.Finish!.Value,
-            request.DynamoDbProjectsInfo.PoolzBackId
+            request.PhaseContext.StrapiProjectInfo.CurrentPhase.Finish!.Value,
+            request.PhaseContext.DynamoDbProjectsInfo.PoolzBackId
         ));
     }
 }

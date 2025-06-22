@@ -1,17 +1,14 @@
 ﻿using MediatR;
 using Newtonsoft.Json;
 using Amazon.DynamoDBv2.DataModel;
-using InvestProvider.Backend.Services.Strapi.Models;
+using InvestProvider.Backend.Services.Validators;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
 
 public class AdminCreatePoolzBackIdRequest :
     ProjectsInformation,
-    IRequest<AdminCreatePoolzBackIdResponse>,
-    IExistActivePhase,
-    IInvestPool
+    IRequest<AdminCreatePoolzBackIdResponse>
 {
     [JsonRequired]
     [DynamoDBIgnore]
@@ -21,8 +18,8 @@ public class AdminCreatePoolzBackIdRequest :
     public bool FilterPhases => false;
 
     [JsonIgnore]
-    public ProjectInfo StrapiProjectInfo { get; set; } = null!;
+    public PhaseValidationContext PhaseContext { get; } = new();
 
     [JsonIgnore]
-    public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
+    public string PhaseId => PhaseContext.StrapiProjectInfo.CurrentPhase!.Id;
 }

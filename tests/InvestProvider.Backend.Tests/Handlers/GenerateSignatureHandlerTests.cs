@@ -34,11 +34,11 @@ public class GenerateSignatureHandlerTests
 
         var handler = new GenerateSignatureHandler(chainProvider.Object, signatureGenerator.Object);
         var request = new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "0");
-        request.StrapiProjectInfo = projectInfo;
-        request.DynamoDbProjectsInfo = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
-        request.Amount = 10;
-        request.TokenDecimals = 18;
-        request.UserInvestments = Array.Empty<UserInvestments>();
+        request.PhaseContext.StrapiProjectInfo = projectInfo;
+        request.PhaseContext.DynamoDbProjectsInfo = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
+        request.PhaseContext.Amount = 10;
+        request.PhaseContext.TokenDecimals = 18;
+        request.PhaseContext.UserInvestments = Array.Empty<UserInvestments>();
 
         var result = await handler.Handle(request, CancellationToken.None);
 

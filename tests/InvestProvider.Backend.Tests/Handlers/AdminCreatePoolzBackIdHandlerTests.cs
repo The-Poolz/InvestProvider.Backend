@@ -22,9 +22,9 @@ public class AdminCreatePoolzBackIdHandlerTests
         {
             ProjectId = "pid",
             PoolzBackId = 42,
-            ChainId = 1,
-            StrapiProjectInfo = projectInfo
+            ChainId = 1
         };
+        request.PhaseContext.StrapiProjectInfo = projectInfo;
 
         var result = await handler.Handle(request, CancellationToken.None);
 

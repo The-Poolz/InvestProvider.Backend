@@ -47,30 +47,30 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
             .MustAsync(MustMoreThanAllowedMinimumAsync)
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
-                UserAmount = x.Amount,
-                MinInvestAmount = UnitConversion.Convert.FromWei(_minInvestAmount, x.TokenDecimals)
+                UserAmount = x.PhaseContext.Amount,
+                MinInvestAmount = UnitConversion.Convert.FromWei(_minInvestAmount, x.PhaseContext.TokenDecimals)
             })
             .CustomAsync(SetUserInvestmentsAsync);
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
-            .Must(x => x.Amount <= x.StrapiProjectInfo.CurrentPhase!.MaxInvest)
-            .WithError(Error.AMOUNT_EXCEED_MAX_INVEST, x => new { x.StrapiProjectInfo.CurrentPhase!.MaxInvest })
-            .Must(x => x.InvestedAmount == 0)
+            .Must(x => x.PhaseContext.Amount <= x.PhaseContext.StrapiProjectInfo.CurrentPhase!.MaxInvest)
+            .WithError(Error.AMOUNT_EXCEED_MAX_INVEST, x => new { x.PhaseContext.StrapiProjectInfo.CurrentPhase!.MaxInvest })
+            .Must(x => x.PhaseContext.InvestedAmount == 0)
             .WithError(Error.ALREADY_INVESTED)
-            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest != 0);
+            .When(x => x.PhaseContext.StrapiProjectInfo.CurrentPhase!.MaxInvest != 0);
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
             .MustAsync(NotNullWhiteListAsync)
-            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address })
-            .Must(x => x.Amount + x.InvestedAmount <= x.WhiteList.Amount)
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.PhaseContext.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address })
+            .Must(x => x.PhaseContext.Amount + x.PhaseContext.InvestedAmount <= x.PhaseContext.WhiteList.Amount)
             .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT, x => new
             {
-                UserAmount = x.Amount,
-                MaxInvestAmount = x.WhiteList.Amount,
-                InvestSum = x.InvestedAmount
+                UserAmount = x.PhaseContext.Amount,
+                MaxInvestAmount = x.PhaseContext.WhiteList.Amount,
+                InvestSum = x.PhaseContext.InvestedAmount
             })
-            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0);
+            .When(x => x.PhaseContext.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0);
     }
 }

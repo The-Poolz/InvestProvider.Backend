@@ -17,38 +17,38 @@ public partial class GenerateSignatureRequestValidator
     private async Task<bool> MustMoreThanAllowedMinimumAsync(GenerateSignatureRequest model, CancellationToken _)
     {
         var tokenAddress = await _lockDealNFT.TokenOfQueryAsync(
-            model.StrapiProjectInfo.ChainId,
+            model.PhaseContext.StrapiProjectInfo.ChainId,
             ContractType.LockDealNFT,
-            model.DynamoDbProjectsInfo.PoolzBackId
+            model.PhaseContext.DynamoDbProjectsInfo.PoolzBackId
         );
 
-        model.TokenDecimals = _erc20Cache.GetOrAdd(new GetCacheRequest(
-            model.StrapiProjectInfo.ChainId,
+        model.PhaseContext.TokenDecimals = _erc20Cache.GetOrAdd(new GetCacheRequest(
+            model.PhaseContext.StrapiProjectInfo.ChainId,
             tokenAddress,
-            _rpcProvider.RpcUrl(model.StrapiProjectInfo.ChainId)
+            _rpcProvider.RpcUrl(model.PhaseContext.StrapiProjectInfo.ChainId)
         )).Decimals;
 
-        model.Amount = UnitConversion.Convert.FromWei(BigInteger.Parse(model.WeiAmount), model.TokenDecimals);
+        model.PhaseContext.Amount = UnitConversion.Convert.FromWei(BigInteger.Parse(model.WeiAmount), model.PhaseContext.TokenDecimals);
 
-        return model.Amount >= _minInvestAmount;
+        return model.PhaseContext.Amount >= _minInvestAmount;
     }
 
     private async Task SetUserInvestmentsAsync(GenerateSignatureRequest model, ValidationContext<GenerateSignatureRequest> context, CancellationToken _)
     {
         var response = await _investProvider.GetUserInvestsQueryAsync(
-            model.StrapiProjectInfo.ChainId,
+            model.PhaseContext.StrapiProjectInfo.ChainId,
             ContractType.InvestedProvider,
-            model.DynamoDbProjectsInfo.PoolzBackId,
+            model.PhaseContext.DynamoDbProjectsInfo.PoolzBackId,
             model.UserAddress
         );
 
-        model.UserInvestments = response.ReturnValue1
+        model.PhaseContext.UserInvestments = response.ReturnValue1
             .Select(ui => new UserInvestments(ui))
             .ToArray();
 
-        model.InvestedAmount = model.UserInvestments
-            .Where(ui => ui.BlockCreation >= model.StrapiProjectInfo.CurrentPhase!.Start && ui.BlockCreation < model.StrapiProjectInfo.CurrentPhase.Finish)
-            .Sum(ui => UnitConversion.Convert.FromWei(ui.Amount, model.TokenDecimals));
+        model.PhaseContext.InvestedAmount = model.PhaseContext.UserInvestments
+            .Where(ui => ui.BlockCreation >= model.PhaseContext.StrapiProjectInfo.CurrentPhase!.Start && ui.BlockCreation < model.PhaseContext.StrapiProjectInfo.CurrentPhase.Finish)
+            .Sum(ui => UnitConversion.Convert.FromWei(ui.Amount, model.PhaseContext.TokenDecimals));
     }
 
 }

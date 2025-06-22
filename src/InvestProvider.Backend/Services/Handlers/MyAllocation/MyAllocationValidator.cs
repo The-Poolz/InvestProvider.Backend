@@ -22,12 +22,12 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
             .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
             .Must(SetPhase)
             .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
-            .Must(x => DateTime.UtcNow < x.Phase.Finish)
-            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow })
-            .Must(x => x.Phase.MaxInvest == 0)
+            .Must(x => DateTime.UtcNow < x.PhaseContext.Phase.Finish)
+            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.PhaseContext.Phase.Finish, NowTime = DateTime.UtcNow })
+            .Must(x => x.PhaseContext.Phase.MaxInvest == 0)
             .WithError(Error.PHASE_IS_NOT_WHITELIST)
             .MustAsync(NotNullWhiteListAsync)
-            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.PhaseContext.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
 
 }
