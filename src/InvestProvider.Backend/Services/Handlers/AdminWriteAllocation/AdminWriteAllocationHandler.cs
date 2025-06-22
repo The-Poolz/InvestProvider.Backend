@@ -10,7 +10,7 @@ namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 public class AdminWriteAllocationHandler(IDynamoDBContext dynamoDb)
     : IRequestHandler<AdminWriteAllocationRequest, AdminWriteAllocationResponse>
 {
-    private const int BatchSize = 25;
+    private static readonly int BatchSize = Env.BATCH_SIZE.GetOrDefault<int>(25);
     private static readonly int MaxParallel = Env.MAX_PARALLEL.GetOrDefault<int>(10);
 
     public async Task<AdminWriteAllocationResponse> Handle(AdminWriteAllocationRequest request, CancellationToken cancellationToken)
