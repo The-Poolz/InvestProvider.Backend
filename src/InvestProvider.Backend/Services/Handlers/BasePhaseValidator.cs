@@ -1,11 +1,11 @@
 using FluentValidation;
-using System.Linq;
+using DdbProjectsInfo = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
 using System.Threading;
 using System.Threading.Tasks;
     where T : IPhaseRequest
         model.PhaseContext.StrapiProjectInfo = _strapi.ReceiveProjectInfo(model.ProjectId, filterPhases: model.FilterPhases);
         return model.PhaseContext.StrapiProjectInfo.CurrentPhase != null;
-        model.PhaseContext.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<DynamoProjectsInformation>(model.ProjectId, token);
+        model.PhaseContext.DynamoDbProjectsInfo = await _dynamoDb.LoadAsync<DdbProjectsInfo>(model.ProjectId, token);
         return model.PhaseContext.DynamoDbProjectsInfo != null;
         var phase = ((IEnumerable<ComponentPhaseStartEndAmount>)model.PhaseContext.StrapiProjectInfo.Phases)
             .FirstOrDefault(p => p.Id == model.PhaseId);
