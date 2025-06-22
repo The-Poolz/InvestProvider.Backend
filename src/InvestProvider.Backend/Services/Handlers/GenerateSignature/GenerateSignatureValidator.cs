@@ -12,10 +12,8 @@ using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
-public partial class GenerateSignatureRequestValidator : AbstractValidator<GenerateSignatureRequest>
+public partial class GenerateSignatureRequestValidator : BasePhaseValidator<GenerateSignatureRequest>
 {
-    private readonly IStrapiClient _strapi;
-    private readonly IDynamoDBContext _dynamoDb;
     private readonly IRpcProvider _rpcProvider;
     private readonly ERC20CacheProvider _erc20Cache;
     private readonly ILockDealNFTService<ContractType> _lockDealNFT;
@@ -28,10 +26,8 @@ public partial class GenerateSignatureRequestValidator : AbstractValidator<Gener
         ERC20CacheProvider erc20Cache,
         ILockDealNFTService<ContractType> lockDealNFT,
         IInvestProviderService<ContractType> investProvider
-    )
+    ) : base(strapi, dynamoDb)
     {
-        _strapi = strapi;
-        _dynamoDb = dynamoDb;
         _rpcProvider = rpcProvider;
         _erc20Cache = erc20Cache;
         _lockDealNFT = lockDealNFT;

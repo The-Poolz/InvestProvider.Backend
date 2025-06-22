@@ -10,9 +10,10 @@ namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 [method: JsonConstructor]
 public class GenerateSignatureRequest(string projectId, EthereumAddress userAddress, string weiAmount) :
-    IRequest<GenerateSignatureResponse>, 
+    IRequest<GenerateSignatureResponse>,
     IFcfsSignature,
-    IWhiteListSignature
+    IWhiteListSignature,
+    IWhiteListUser
 {
     [JsonRequired]
     public string ProjectId { get; } = projectId;
