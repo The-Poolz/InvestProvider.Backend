@@ -40,6 +40,6 @@ public class AdminGetAllocationHandler(IStrapiClient strapi, IDynamoDBContext dy
         
         await Task.WhenAll(tasks);
 
-        return whiteLists.ToArray();
+        return [.. whiteLists];
     }
 }
