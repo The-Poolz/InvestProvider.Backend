@@ -12,14 +12,12 @@ namespace InvestProvider.Backend;
 public class InvestProviderLambda(IServiceProvider serviceProvider)
 {
     public InvestProviderLambda() : this(DefaultServiceProvider.Build()) { }
-
+    internal IMediator Mediator => serviceProvider.GetRequiredService<IMediator>();
     public async Task<LambdaResponse> RunAsync(LambdaRequest request)
     {
         try
         {
-            var response = await serviceProvider
-                .GetRequiredService<IMediator>()
-                .Send(request.HandlerRequest);
+            var response = await Mediator.Send(request.HandlerRequest);
             return new LambdaResponse(response);
         }
         catch (ValidationException ex)

@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.DynamoDBv2.DataModel;
@@ -12,56 +10,19 @@ using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Handlers.MyAllocation;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
 using Net.Web3.EthereumWallet;
+using FluentValidation;
+using InvestProvider.Backend.Tests;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
 public class MyAllocationHandlerTests
 {
-    private static object CreatePhase(string id, DateTime start, DateTime finish, decimal maxInvest)
-    {
-        var type = Type.GetType("Poolz.Finance.CSharp.Strapi.ComponentPhaseStartEndAmount, Poolz.Finance.CSharp.Strapi")!;
-        var obj = Activator.CreateInstance(type)!;
-        type.GetProperty("Id")?.SetValue(obj, id);
-        type.GetProperty("Start")?.SetValue(obj, (DateTime?)start);
-        type.GetProperty("Finish")?.SetValue(obj, (DateTime?)finish);
-        var maxInvestProp = type.GetProperty("MaxInvest");
-        if (maxInvestProp != null)
-        {
-            var targetType = Nullable.GetUnderlyingType(maxInvestProp.PropertyType) ?? maxInvestProp.PropertyType;
-            object? converted = Convert.ChangeType(maxInvest, targetType);
-            maxInvestProp.SetValue(obj, converted);
-        }
-        return obj;
-    }
-
-    private static ProjectInfo CreateProjectInfo(long chainId, object phase)
-    {
-        var projectsInfoType = Type.GetType("Poolz.Finance.CSharp.Strapi.ProjectsInformation, Poolz.Finance.CSharp.Strapi")!;
-        var chainSettingType = Type.GetType("Poolz.Finance.CSharp.Strapi.ChainSetting, Poolz.Finance.CSharp.Strapi")!;
-        var chainType = Type.GetType("Poolz.Finance.CSharp.Strapi.Chain, Poolz.Finance.CSharp.Strapi")!;
-
-        var phasesList = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(phase.GetType()))!;
-        phasesList.Add(phase);
-
-        var chain = Activator.CreateInstance(chainType)!;
-        chainType.GetProperty("ChainId")?.SetValue(chain, (long?)chainId);
-
-        var chainSetting = Activator.CreateInstance(chainSettingType)!;
-        chainSettingType.GetProperty("Chain")?.SetValue(chainSetting, chain);
-
-        var projectsInfo = Activator.CreateInstance(projectsInfoType)!;
-        projectsInfoType.GetProperty("ChainSetting")?.SetValue(projectsInfo, chainSetting);
-        projectsInfoType.GetProperty("ProjectPhases")?.SetValue(projectsInfo, phasesList);
-
-        var projectInfoResponse = new ProjectInfoResponse((dynamic)projectsInfo);
-        return new ProjectInfo(projectInfoResponse);
-    }
 
     [Fact]
     public async Task Handle_ReturnsResponse_WhenDataExists()
     {
-        var phase = CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
-        var projectInfo = CreateProjectInfo(1, phase);
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
         strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
@@ -77,9 +38,11 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(whiteList);
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", address);
 
+        await validator.ValidateAndThrowAsync(request);
         var result = await handler.Handle(request, CancellationToken.None);
 
         Assert.Equal(whiteList.Amount, result.Amount);
@@ -91,8 +54,8 @@ public class MyAllocationHandlerTests
     [Fact]
     public async Task Handle_Throws_WhenWhiteListMissing()
     {
-        var phase = CreatePhase("2", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
-        var projectInfo = CreateProjectInfo(1, phase);
+        var phase = TestHelpers.CreatePhase("2", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
         strapi.Setup(x => x.ReceiveProjectInfo("pid", false)).Returns(projectInfo);
@@ -104,10 +67,15 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<WhiteList>(null!));
 
-        var handler = new MyAllocationHandler(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
 
-        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(() => handler.Handle(request, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(async () =>
+        {
+            await validator.ValidateAndThrowAsync(request);
+            await handler.Handle(request, CancellationToken.None);
+        });
         Assert.Contains("User not in white list", ex.Message);
     }
 }
