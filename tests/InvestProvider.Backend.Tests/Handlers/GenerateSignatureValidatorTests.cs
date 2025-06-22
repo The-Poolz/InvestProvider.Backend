@@ -39,11 +39,20 @@ public class GenerateSignatureValidatorTests
     private static void SetupCommonMocks(Mock<ILockDealNFTService<ContractType>> lockDealNFT, Mock<ERC20CacheProvider> erc20,
         Mock<IRpcProvider> rpcProvider, Mock<IInvestProviderService<ContractType>> investProvider)
     {
-        lockDealNFT.Setup(x => x.TokenOfQueryAsync(It.IsAny<long>(), ContractType.LockDealNFT, It.IsAny<BigInteger>(), null))
+        lockDealNFT.Setup(x => x.TokenOfQueryAsync(
+                It.IsAny<long>(),
+                ContractType.LockDealNFT,
+                It.IsAny<BigInteger>(),
+                It.IsAny<BlockParameter>()))
                    .ReturnsAsync(new EthereumAddress("0x00000000000000000000000000000000000000aa"));
         rpcProvider.Setup(x => x.RpcUrl(It.IsAny<long>())).Returns("http://rpc");
-        investProvider.Setup(x => x.GetUserInvestsQueryAsync(It.IsAny<long>(), ContractType.InvestedProvider, It.IsAny<BigInteger>(), It.IsAny<string>(), null))
-                      .ReturnsAsync(new GetUserInvestsOutputDTO { ReturnValue1 = new List<UserInvest>() });
+        investProvider.Setup(x => x.GetUserInvestsQueryAsync(
+                It.IsAny<long>(),
+                ContractType.InvestedProvider,
+                It.IsAny<BigInteger>(),
+                It.IsAny<string>(),
+                It.IsAny<BlockParameter>()))
+                        .ReturnsAsync(new GetUserInvestsOutputDTO { ReturnValue1 = new List<UserInvest>() });
         erc20.Setup(x => x.GetOrAdd(It.IsAny<GetCacheRequest>()))
              .Returns(new ERC20DynamoDbTable { Decimals = (byte)18 });
     }
