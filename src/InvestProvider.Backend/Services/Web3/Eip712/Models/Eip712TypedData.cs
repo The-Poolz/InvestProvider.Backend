@@ -9,9 +9,7 @@ public class Eip712TypedData : TypedData<Eip712Domain>
 {
     public Eip712TypedData(Eip712Domain domain, InvestMessage investMessage)
     {
-        Types = MemberDescriptionFactory.GetTypesMemberDescription(
-            types: [typeof(InvestMessage), typeof(Eip712Domain)]
-        );
+        Types = MemberDescriptionFactory.GetTypesMemberDescription(typeof(InvestMessage), typeof(Eip712Domain));
         Domain = domain;
         DomainRawValues = MemberValueFactory.CreateFromMessage(Domain);
         PrimaryType = nameof(InvestMessage);
