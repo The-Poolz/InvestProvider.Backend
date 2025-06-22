@@ -7,17 +7,11 @@ using InvestProvider.Backend.Services.Validators.Models;
 
 namespace InvestProvider.Backend.Services.Handlers;
 
-public abstract class BasePhaseValidator<T> : AbstractValidator<T>
+public abstract class BasePhaseValidator<T>(IStrapiClient strapi, IDynamoDBContext dynamoDb) : AbstractValidator<T>
     where T : IExistActivePhase
 {
-    protected readonly IStrapiClient _strapi;
-    protected readonly IDynamoDBContext _dynamoDb;
-
-    protected BasePhaseValidator(IStrapiClient strapi, IDynamoDBContext dynamoDb)
-    {
-        _strapi = strapi;
-        _dynamoDb = dynamoDb;
-    }
+    protected readonly IStrapiClient _strapi = strapi;
+    protected readonly IDynamoDBContext _dynamoDb = dynamoDb;
 
     protected bool NotNullCurrentPhase(IExistActivePhase model)
     {
