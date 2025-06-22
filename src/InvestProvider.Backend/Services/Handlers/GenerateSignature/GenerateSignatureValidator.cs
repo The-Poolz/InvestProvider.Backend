@@ -2,7 +2,6 @@ using FluentValidation;
 using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
 using Net.Cache.DynamoDb.ERC20;
-using Nethereum.Util;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Web3.Contracts;
@@ -48,7 +47,7 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
                 UserAmount = x.Amount,
-                MinInvestAmount = UnitConversion.Convert.FromWei(_minInvestAmount, x.TokenDecimals)
+                MinInvestAmount = _minInvestAmount
             })
             .CustomAsync(SetUserInvestmentsAsync);
 

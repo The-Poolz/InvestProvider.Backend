@@ -14,9 +14,18 @@ public class GenerateSignatureHandler(
 )
     : IRequestHandler<GenerateSignatureRequest, GenerateSignatureResponse>
 {
-    public Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken)
-    {
-        var signature = signatureGenerator.GenerateSignature(
+    public Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken) =>
+        Task.FromResult(new GenerateSignatureResponse(
+            GetSignature(chainProvider, signatureGenerator, request),
+            request.StrapiProjectInfo.CurrentPhase!.Finish!.Value,
+            request.DynamoDbProjectsInfo.PoolzBackId
+        ));
+
+    private static string GetSignature(
+        IChainProvider<ContractType> chainProvider,
+        ISignatureGenerator signatureGenerator,
+        GenerateSignatureRequest request) =>
+        signatureGenerator.GenerateSignature(
             new Eip712Domain(
                 chainId: request.StrapiProjectInfo.ChainId,
                 verifyingContract: chainProvider.ContractAddress(request.StrapiProjectInfo.ChainId, ContractType.InvestedProvider)
@@ -29,10 +38,4 @@ public class GenerateSignatureHandler(
                 nonce: request.UserInvestments.Length
             )
         );
-
-        return Task.FromResult(new GenerateSignatureResponse(signature,
-            request.StrapiProjectInfo.CurrentPhase.Finish!.Value,
-            request.DynamoDbProjectsInfo.PoolzBackId
-        ));
-    }
 }

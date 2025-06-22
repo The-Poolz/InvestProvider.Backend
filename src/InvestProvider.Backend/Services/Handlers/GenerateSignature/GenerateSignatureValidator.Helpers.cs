@@ -11,7 +11,7 @@ namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
 public partial class GenerateSignatureRequestValidator
 {
-    private readonly byte _minInvestAmount = Env.MIN_INVEST_AMOUNT.GetOrDefault<byte>(1);
+    private readonly decimal _minInvestAmount = Env.MIN_INVEST_AMOUNT.GetOrDefault<decimal>(1);
 
     private async Task<bool> MustMoreThanAllowedMinimumAsync(GenerateSignatureRequest model, CancellationToken _)
     {
