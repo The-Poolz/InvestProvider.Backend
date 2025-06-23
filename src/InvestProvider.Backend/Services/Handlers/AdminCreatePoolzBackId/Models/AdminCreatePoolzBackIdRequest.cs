@@ -18,11 +18,14 @@ public class AdminCreatePoolzBackIdRequest :
     public long ChainId { get; set; }
 
     [JsonIgnore]
+    [DynamoDBIgnore]
     public bool FilterPhases => false;
 
     [JsonIgnore]
+    [DynamoDBIgnore]
     public ProjectInfo StrapiProjectInfo { get; set; } = null!;
 
     [JsonIgnore]
+    [DynamoDBIgnore]
     public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
 }
