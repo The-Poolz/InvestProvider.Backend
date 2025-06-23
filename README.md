@@ -1,6 +1,17 @@
 # InvestProvider.Backend
 
-Lambda handler of API4.InvestProvider endpoints.
+Backend services implemented as AWS Lambda functions for the
+`API4.InvestProvider` endpoints. The project targets **.NET 8** and can be
+built and tested locally using the standard `dotnet` CLI tools.
+
+## Handlers
+
+- `GenerateSignature` – generate an EIP712 signature for investors.
+- `AdminWriteAllocation` – write whitelist information into DynamoDB.
+- `AdminGetAllocation` – retrieve whitelist data for project phases.
+- `AdminCreatePoolzBackId` – register a pool identifier in DynamoDB.
+- `MyAllocation` – return allocation details for the current phase.
+- `MyUpcomingAllocation` – return upcoming allocations for multiple projects.
 
 ## Environment variables
 | Name | Description | Default |
@@ -48,7 +59,7 @@ Handler return generated signature, signature valid until (finish time of curren
 This handler using to write whitelist information into DB.
 
 #### Request
-Handler receive `documentId` of project, `if` of phase and white list data.
+Handler receive `documentId` of project, `id` of phase and white list data.
 ```json
 {
   "ProjectId": "xyz",
@@ -71,7 +82,144 @@ Handler just returns count of saved item into DB.
 }
 ```
 
+
 **Handler workflow:**
 - Receive from DynamoDb poolId of project and throw if poolId not registered.
 - Receive project information from Strapi. Throw exception if phase in project not found, if phase is not whitelist, or if phase already finished.
 - Batch save into DynamoDb whitelist data.
+
+## AdminGetAllocation handler
+This handler retrieves the stored white-list information for all whitelist phases of a project.
+
+#### Request
+Handler receive `documentId` of project.
+```json
+{
+  "ProjectId": "xyz"
+}
+```
+
+#### Response
+Handler returns an array of phase allocations.
+```json
+[
+  {
+    "PhaseId": "123",
+    "WhiteList": [
+      { "UserAddress": "0x0000000000000000000000000000000000000000", "Amount": 1.0 }
+    ]
+  }
+]
+```
+
+**Handler workflow:**
+- Load project phases from Strapi.
+- Query DynamoDB for whitelist entries of each phase in parallel.
+- Return consolidated results.
+
+## AdminCreatePoolzBackId handler
+This handler registers mapping between a Strapi project and a `PoolzBackId` in DynamoDB.
+
+#### Request
+Handler receive `documentId` of project, pool identifier and chain id.
+```json
+{
+  "ProjectId": "xyz",
+  "PoolzBackId": 123,
+  "ChainId": 1
+}
+```
+
+#### Response
+Handler returns the saved mapping.
+```json
+{
+  "ProjectId": "xyz",
+  "PoolzBackId": 123
+}
+```
+
+**Handler workflow:**
+- Validate that the pool exists on-chain and that the providers match.
+- Save mapping information in DynamoDB.
+- Return the created project mapping.
+
+## MyAllocation handler
+This handler returns allocation details for the caller in the current phase.
+
+#### Request
+Handler receive `documentId` of project and user address.
+```json
+{
+  "ProjectId": "xyz",
+  "UserAddress": "0x0000000000000000000000000000000000000000"
+}
+```
+
+#### Response
+Handler returns the whitelist amount and related information.
+```json
+{
+  "Amount": 1.0,
+  "StartTime": "2024-06-01T00:00:00Z",
+  "EndTime": "2024-06-02T00:00:00Z",
+  "PoolzBackId": 123
+}
+```
+
+**Handler workflow:**
+- Validate that the current phase is whitelist and the user is listed.
+- Return the allocation amount, phase dates and pool identifier.
+
+## MyUpcomingAllocation handler
+This handler lists how much a user will be able to invest in upcoming phases across multiple projects.
+
+#### Request
+Handler receive list of `projectIDs` and user address.
+```json
+{
+  "ProjectIDs": ["p1", "p2"],
+  "UserAddress": "0x0000000000000000000000000000000000000000"
+}
+```
+
+#### Response
+Handler returns upcoming allocation amounts by project.
+```json
+[
+  {
+    "ProjectId": "p1",
+    "PoolzBackId": 11,
+    "Amount": 0.5
+  }
+]
+```
+
+**Handler workflow:**
+- Query DynamoDB for all whitelist entries of the user.
+- Load project information for the requested IDs.
+- Aggregate amounts per project.
+
+## Getting Started
+
+Clone the repository and restore dependencies using the `.NET` CLI:
+
+```bash
+dotnet restore
+```
+
+Build the solution:
+
+```bash
+dotnet build InvestProvider.Backend.sln
+```
+
+Run the unit tests:
+
+```bash
+dotnet test InvestProvider.Backend.sln
+```
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
