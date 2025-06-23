@@ -25,7 +25,7 @@ public class MyAllocationHandlerTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", true)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         var projectData = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
@@ -58,7 +58,7 @@ public class MyAllocationHandlerTests
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
         var strapi = new Mock<IStrapiClient>();
-        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", false)).ReturnsAsync(projectInfo);
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", true)).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
         var projectData = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 };
