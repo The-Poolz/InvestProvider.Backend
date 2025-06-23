@@ -24,7 +24,7 @@ public class MyAllocationRequest(string projectId, EthereumAddress userAddress) 
     public EthereumAddress UserAddress { get; } = userAddress;
 
     [JsonIgnore]
-    public bool FilterPhases => false;
+    public bool FilterPhases => true;
 
     [JsonIgnore]
     public string PhaseId => StrapiProjectInfo.CurrentPhase!.Id;
