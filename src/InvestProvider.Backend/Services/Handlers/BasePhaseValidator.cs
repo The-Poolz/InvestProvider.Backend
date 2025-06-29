@@ -60,6 +60,7 @@ public abstract class BasePhaseValidator<T>(IStrapiClient strapi, IDynamoDBConte
             .Must(x => DateTime.UtcNow < x.Phase.Finish)
             .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow })
             .Must(x => x.Phase.MaxInvest == 0)
-            .WithError(Error.PHASE_IS_NOT_WHITELIST);
+            .WithError(Error.PHASE_IS_NOT_WHITELIST)
+            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0, ApplyConditionTo.CurrentValidator);
     }
 }
