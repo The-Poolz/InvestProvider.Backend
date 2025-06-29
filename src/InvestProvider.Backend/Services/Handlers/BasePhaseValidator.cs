@@ -46,7 +46,7 @@ public abstract class BasePhaseValidator<T>(IStrapiClient strapi, IDynamoDBConte
         return model.WhiteList != null;
     }
 
-    protected static IRuleBuilderOptions<TModel, TModel> WhiteListPhaseRules<TModel>(BasePhaseValidator<TModel> validator)
+    protected static IRuleBuilderOptions<TModel, TModel> ActivePhaseRules<TModel>(BasePhaseValidator<TModel> validator)
         where TModel : IExistPhase, IValidatedDynamoDbProjectInfo
     {
         return validator.RuleFor(x => x)
@@ -58,7 +58,13 @@ public abstract class BasePhaseValidator<T>(IStrapiClient strapi, IDynamoDBConte
             .Must(m => SetPhase(m))
             .WithError(Error.PHASE_IN_PROJECT_NOT_FOUND, x => new { x.ProjectId, x.PhaseId })
             .Must(x => DateTime.UtcNow < x.Phase.Finish)
-            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow })
+            .WithError(Error.PHASE_FINISHED, x => new { EndTime = x.Phase.Finish, NowTime = DateTime.UtcNow });
+    }
+
+    protected static IRuleBuilderOptions<TModel, TModel> WhiteListPhaseRules<TModel>(BasePhaseValidator<TModel> validator)
+        where TModel : IExistPhase, IValidatedDynamoDbProjectInfo
+    {
+        return ActivePhaseRules(validator)
             .Must(x => x.Phase.MaxInvest == 0)
             .WithError(Error.PHASE_IS_NOT_WHITELIST);
     }
