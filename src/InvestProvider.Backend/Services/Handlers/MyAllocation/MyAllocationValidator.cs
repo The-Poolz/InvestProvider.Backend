@@ -1,6 +1,6 @@
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
+using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
 
@@ -15,6 +15,7 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
 
         WhiteListPhaseRules(this)
             .MustAsync(NotNullWhiteListAsync)
+            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0, ApplyConditionTo.CurrentValidator)
             .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
 }

@@ -39,7 +39,7 @@ public class MyAllocationRequest(string projectId, EthereumAddress userAddress) 
     public ProjectsInformation DynamoDbProjectsInfo { get; set; } = null!;
 
     [JsonIgnore]
-    public WhiteList WhiteList { get; set; } = null!;
+    public WhiteList? WhiteList { get; set; }
 
     [JsonIgnore]
     public long ChainId => StrapiProjectInfo.ChainId;
