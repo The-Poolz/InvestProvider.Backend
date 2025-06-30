@@ -42,30 +42,30 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
             .MustAsync(MustMoreThanAllowedMinimumAsync)
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
             {
-                UserAmount = x.Amount,
+                UserAmount = x.Context.Amount,
                 MinInvestAmount = _minInvestAmount
             })
             .CustomAsync(SetUserInvestmentsAsync);
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
-            .Must(x => x.Amount <= x.StrapiProjectInfo.CurrentPhase!.MaxInvest)
-            .WithError(Error.AMOUNT_EXCEED_MAX_INVEST, x => new { x.StrapiProjectInfo.CurrentPhase!.MaxInvest })
-            .Must(x => x.InvestedAmount == 0)
+            .Must(x => x.Context.Amount <= x.Context.StrapiProjectInfo!.CurrentPhase!.MaxInvest)
+            .WithError(Error.AMOUNT_EXCEED_MAX_INVEST, x => new { x.Context.StrapiProjectInfo!.CurrentPhase!.MaxInvest })
+            .Must(x => x.Context.InvestedAmount == 0)
             .WithError(Error.ALREADY_INVESTED)
-            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest != 0);
+            .When(x => x.Context.StrapiProjectInfo!.CurrentPhase!.MaxInvest != 0);
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
             .Must(HasWhiteList)
-            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address })
-            .Must(x => x.Amount + x.InvestedAmount <= x.WhiteList.Amount)
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.Context.StrapiProjectInfo!.CurrentPhase!.Id, UserAddress = x.UserAddress.Address })
+            .Must(x => x.Context.Amount + x.Context.InvestedAmount <= x.Context.WhiteList!.Amount)
             .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT, x => new
             {
-                UserAmount = x.Amount,
-                MaxInvestAmount = x.WhiteList.Amount,
-                InvestSum = x.InvestedAmount
+                UserAmount = x.Context.Amount,
+                MaxInvestAmount = x.Context.WhiteList!.Amount,
+                InvestSum = x.Context.InvestedAmount
             })
-            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0);
+            .When(x => x.Context.StrapiProjectInfo!.CurrentPhase!.MaxInvest == 0);
     }
 }

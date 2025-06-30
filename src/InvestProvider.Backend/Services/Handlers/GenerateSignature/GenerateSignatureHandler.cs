@@ -17,8 +17,8 @@ public class GenerateSignatureHandler(
     public Task<GenerateSignatureResponse> Handle(GenerateSignatureRequest request, CancellationToken cancellationToken) =>
         Task.FromResult(new GenerateSignatureResponse(
             GetSignature(chainProvider, signatureGenerator, request),
-            request.StrapiProjectInfo.CurrentPhase!.Finish!.Value,
-            request.DynamoDbProjectsInfo.PoolzBackId
+            request.Context.StrapiProjectInfo!.CurrentPhase!.Finish!.Value,
+            request.Context.DynamoDbProjectsInfo!.PoolzBackId
         ));
 
     private static string GetSignature(
@@ -27,15 +27,15 @@ public class GenerateSignatureHandler(
         GenerateSignatureRequest request) =>
         signatureGenerator.GenerateSignature(
             new Eip712Domain(
-                chainId: request.StrapiProjectInfo.ChainId,
-                verifyingContract: chainProvider.ContractAddress(request.StrapiProjectInfo.ChainId, ContractType.InvestedProvider)
+                chainId: request.Context.StrapiProjectInfo!.ChainId,
+                verifyingContract: chainProvider.ContractAddress(request.Context.StrapiProjectInfo!.ChainId, ContractType.InvestedProvider)
             ),
             new InvestMessage(
-                poolId: request.DynamoDbProjectsInfo.PoolzBackId,
-                userAddress: request.UserAddress,
-                amount: UnitConversion.Convert.ToWei(request.Amount, request.TokenDecimals),
-                validUntil: request.StrapiProjectInfo.CurrentPhase!.Finish!.Value,
-                nonce: request.UserInvestments.Length
+                poolId: request.Context.DynamoDbProjectsInfo!.PoolzBackId,
+                userAddress: request.Context.UserAddress!,
+                amount: UnitConversion.Convert.ToWei(request.Context.Amount, request.Context.TokenDecimals),
+                validUntil: request.Context.StrapiProjectInfo!.CurrentPhase!.Finish!.Value,
+                nonce: request.Context.UserInvestments!.Length
             )
         );
 }

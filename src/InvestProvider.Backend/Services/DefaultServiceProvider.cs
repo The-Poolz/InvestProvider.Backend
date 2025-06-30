@@ -6,6 +6,7 @@ using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
 using Microsoft.Extensions.DependencyInjection;
 using poolz.finance.csharp.contracts.LockDealNFT;
+using InvestProvider.Backend.Services.Handlers.Contexts;
 using InvestProvider.Backend.Services.Web3.Eip712;
 using poolz.finance.csharp.contracts.InvestProvider;
 using InvestProvider.Backend.Services.Web3.Contracts;
@@ -29,6 +30,7 @@ public static class DefaultServiceProvider
         .AddFluentValidation([Assembly.GetExecutingAssembly()])
         .AddTransient(typeof(IPipelineBehavior<,>), typeof(ContextBuilderBehavior<,>))
         .AddTransient(typeof(IRequestContextBuilder<>), typeof(PhaseContextBuilder<>))
+        .AddScoped<PhaseContext>()
         .AddSingleton<IRpcProvider, ChainProvider>()
         .AddSingleton<IChainProvider<ContractType>, ChainProvider>()
         .AddSingleton<IStrapiClient, StrapiClient>()
