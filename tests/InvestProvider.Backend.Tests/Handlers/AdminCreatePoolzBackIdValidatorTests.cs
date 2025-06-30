@@ -1,19 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Numerics;
+using System.Threading;
 using System.Threading.Tasks;
-using Amazon.DynamoDBv2.DataModel;
 using Nethereum.RPC.Eth.DTOs;
 using Moq;
 using Xunit;
 using FluentValidation;
 using InvestProvider.Backend.Services.Strapi;
+using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using poolz.finance.csharp.contracts.LockDealNFT;
 using poolz.finance.csharp.contracts.LockDealNFT.ContractDefinition;
 using InvestProvider.Backend.Tests;
+using InvestProvider.Backend.Services.Handlers.ContextBuilders;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -39,7 +41,8 @@ public class AdminCreatePoolzBackIdValidatorTests
                    .ReturnsAsync(fullData);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
-        var validator = new AdminCreatePoolzBackIdValidator(strapi.Object, dynamoDb.Object, lockDealNFT.Object);
+        var builder = new PhaseContextBuilder<AdminCreatePoolzBackIdRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new AdminCreatePoolzBackIdValidator(lockDealNFT.Object);
         var request = new AdminCreatePoolzBackIdRequest
         {
             ProjectId = "pid",
@@ -47,6 +50,7 @@ public class AdminCreatePoolzBackIdValidatorTests
             ChainId = 1
         };
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await validator.ValidateAndThrowAsync(request);
     }
 
@@ -69,7 +73,8 @@ public class AdminCreatePoolzBackIdValidatorTests
                    .ReturnsAsync(fullData);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
-        var validator = new AdminCreatePoolzBackIdValidator(strapi.Object, dynamoDb.Object, lockDealNFT.Object);
+        var builder = new PhaseContextBuilder<AdminCreatePoolzBackIdRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new AdminCreatePoolzBackIdValidator(lockDealNFT.Object);
         var request = new AdminCreatePoolzBackIdRequest
         {
             ProjectId = "pid",
@@ -77,6 +82,7 @@ public class AdminCreatePoolzBackIdValidatorTests
             ChainId = 1
         };
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await Assert.ThrowsAsync<ValidationException>(() => validator.ValidateAndThrowAsync(request));
     }
 }

@@ -10,6 +10,8 @@ using InvestProvider.Backend.Services.Web3.Eip712;
 using poolz.finance.csharp.contracts.InvestProvider;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using System.Reflection;
+using MediatR;
+using InvestProvider.Backend.Services.Handlers.ContextBuilders;
 using MediatR.Extensions.FluentValidation.AspNetCore;
 
 namespace InvestProvider.Backend.Services;
@@ -25,6 +27,8 @@ public static class DefaultServiceProvider
 #endif
         .AddMediatR(x => x.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
         .AddFluentValidation([Assembly.GetExecutingAssembly()])
+        .AddTransient(typeof(IPipelineBehavior<,>), typeof(ContextBuilderBehavior<,>))
+        .AddTransient(typeof(IRequestContextBuilder<>), typeof(PhaseContextBuilder<>))
         .AddSingleton<IRpcProvider, ChainProvider>()
         .AddSingleton<IChainProvider<ContractType>, ChainProvider>()
         .AddSingleton<IStrapiClient, StrapiClient>()
