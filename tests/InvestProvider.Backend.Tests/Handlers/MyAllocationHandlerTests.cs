@@ -12,6 +12,7 @@ using InvestProvider.Backend.Services.Handlers.MyAllocation.Models;
 using Net.Web3.EthereumWallet;
 using FluentValidation;
 using InvestProvider.Backend.Tests;
+using InvestProvider.Backend.Services.Handlers.ContextBuilders;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -38,10 +39,12 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", startTime), address.Address, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(whiteList);
 
-        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var builder = new PhaseContextBuilder<MyAllocationRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator();
         var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", address);
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await validator.ValidateAndThrowAsync(request);
         var result = await handler.Handle(request, CancellationToken.None);
 
@@ -67,10 +70,12 @@ public class MyAllocationHandlerTests
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<WhiteList>(null!));
 
-        var validator = new MyAllocationValidator(strapi.Object, dynamoDb.Object);
+        var builder = new PhaseContextBuilder<MyAllocationRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new MyAllocationValidator();
         var handler = new MyAllocationHandler();
         var request = new MyAllocationRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"));
 
+        await builder.BuildAsync(request, CancellationToken.None);
         var ex = await Assert.ThrowsAsync<FluentValidation.ValidationException>(async () =>
         {
             await validator.ValidateAndThrowAsync(request);

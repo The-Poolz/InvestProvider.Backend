@@ -12,6 +12,7 @@ using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation;
 using InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 using Net.Web3.EthereumWallet;
 using FluentValidation;
+using InvestProvider.Backend.Services.Handlers.ContextBuilders;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -33,9 +34,11 @@ public class AdminWriteAllocationValidatorTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
 
-        var validator = new AdminWriteAllocationValidator(strapi.Object, dynamoDb.Object);
+        var builder = new PhaseContextBuilder<AdminWriteAllocationRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new AdminWriteAllocationValidator();
         var request = new AdminWriteAllocationRequest("pid", "1", new[] { new UserWithAmount(new EthereumAddress("0x0000000000000000000000000000000000000001"), 10) });
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await validator.ValidateAndThrowAsync(request);
     }
 
@@ -53,9 +56,11 @@ public class AdminWriteAllocationValidatorTests
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
             .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
 
-        var validator = new AdminWriteAllocationValidator(strapi.Object, dynamoDb.Object);
+        var builder = new PhaseContextBuilder<AdminWriteAllocationRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new AdminWriteAllocationValidator();
         var request = new AdminWriteAllocationRequest("pid", "1", Array.Empty<UserWithAmount>());
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await Assert.ThrowsAsync<ValidationException>(() => validator.ValidateAndThrowAsync(request));
     }
 }

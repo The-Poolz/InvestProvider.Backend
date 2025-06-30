@@ -20,19 +20,12 @@ using poolz.finance.csharp.contracts.InvestProvider;
 using poolz.finance.csharp.contracts.InvestProvider.ContractDefinition;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
+using InvestProvider.Backend.Services.Handlers.ContextBuilders;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
 public class GenerateSignatureValidatorTests
 {
-    private static GenerateSignatureRequest CreateRequest(ProjectInfo projectInfo)
-    {
-        return new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "1000000000000000000")
-        {
-            StrapiProjectInfo = projectInfo,
-            DynamoDbProjectsInfo = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 }
-        };
-    }
 
     private static void SetupCommonMocks(Mock<ILockDealNFTService<ContractType>> lockDealNFT, Mock<ERC20CacheProvider> erc20,
         Mock<IRpcProvider> rpcProvider, Mock<IInvestProviderService<ContractType>> investProvider)
@@ -78,9 +71,11 @@ public class GenerateSignatureValidatorTests
         var investProvider = new Mock<IInvestProviderService<ContractType>>();
         SetupCommonMocks(lockDealNFT, erc20, rpcProvider, investProvider);
 
-        var validator = new GenerateSignatureRequestValidator(strapi.Object, dynamoDb.Object, rpcProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
-        var request = CreateRequest(projectInfo);
+        var builder = new PhaseContextBuilder<GenerateSignatureRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new GenerateSignatureRequestValidator(rpcProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
+        var request = new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "1000000000000000000");
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await validator.ValidateAndThrowAsync(request);
     }
 
@@ -107,13 +102,11 @@ public class GenerateSignatureValidatorTests
         var investProvider = new Mock<IInvestProviderService<ContractType>>();
         SetupCommonMocks(lockDealNFT, erc20, rpcProvider, investProvider);
 
-        var validator = new GenerateSignatureRequestValidator(strapi.Object, dynamoDb.Object, rpcProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
-        var request = new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "500000000000000000")
-        {
-            StrapiProjectInfo = projectInfo,
-            DynamoDbProjectsInfo = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 }
-        };
+        var builder = new PhaseContextBuilder<GenerateSignatureRequest>(strapi.Object, dynamoDb.Object);
+        var validator = new GenerateSignatureRequestValidator(rpcProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
+        var request = new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "500000000000000000");
 
+        await builder.BuildAsync(request, CancellationToken.None);
         await Assert.ThrowsAsync<ValidationException>(() => validator.ValidateAndThrowAsync(request));
     }
 }
