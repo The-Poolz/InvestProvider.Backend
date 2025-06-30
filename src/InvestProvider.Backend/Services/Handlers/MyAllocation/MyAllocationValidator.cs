@@ -12,7 +12,7 @@ public class MyAllocationValidator : BasePhaseValidator<MyAllocationRequest>
 
         WhiteListPhaseRules(this)
             .Must(HasWhiteList)
-            .When(x => x.StrapiProjectInfo.CurrentPhase!.MaxInvest == 0, ApplyConditionTo.CurrentValidator)
-            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
+            .When(x => x.Context.StrapiProjectInfo!.CurrentPhase!.MaxInvest == 0, ApplyConditionTo.CurrentValidator)
+            .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.Context.StrapiProjectInfo!.CurrentPhase!.Id, UserAddress = x.UserAddress.Address });
     }
 }

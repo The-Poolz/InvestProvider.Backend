@@ -1,17 +1,14 @@
 ﻿using MediatR;
 using Newtonsoft.Json;
 using Poolz.Finance.CSharp.Strapi;
-using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Handlers.Contexts;
-using ProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
+using Net.Web3.EthereumWallet;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;
 
 public class AdminWriteAllocationRequest(string projectId, string phaseId, ICollection<UserWithAmount> users) :
     IRequest<AdminWriteAllocationResponse>,
-    IValidatedDynamoDbProjectInfo,
-    IExistPhase,
-    IWhiteListPhase
+    IPhaseRequest
 {
     [JsonRequired]
     public string ProjectId { get; } = projectId;
@@ -26,14 +23,14 @@ public class AdminWriteAllocationRequest(string projectId, string phaseId, IColl
     public bool FilterPhases => false;
 
     [JsonIgnore]
-    public ProjectInfo StrapiProjectInfo { get; set; } = null!;
+    public long? ChainId => Context.StrapiProjectInfo?.ChainId;
 
     [JsonIgnore]
-    public long ChainId => StrapiProjectInfo.ChainId;
+    public EthereumAddress? UserAddress => null;
 
     [JsonIgnore]
-    public ProjectsInformation DynamoDbProjectsInfo { get; set; } = null!;
+    public string? WeiAmount => null;
 
     [JsonIgnore]
-    public ComponentPhaseStartEndAmount Phase { get; set; } = null!;
+    public PhaseContext Context { get; set; } = null!;
 }

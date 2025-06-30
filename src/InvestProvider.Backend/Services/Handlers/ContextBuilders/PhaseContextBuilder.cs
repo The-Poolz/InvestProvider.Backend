@@ -2,31 +2,42 @@ using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Handlers.Contexts;
+using InvestProvider.Backend.Services.Handlers.AdminGetAllocation.Models;
+using InvestProvider.Backend.Services.Handlers.MyUpcomingAllocation.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.ContextBuilders;
 
-public class PhaseContextBuilder<T>(IStrapiClient strapi, IDynamoDBContext dynamoDb)
+public class PhaseContextBuilder<T>(IStrapiClient strapi, IDynamoDBContext dynamoDb, PhaseContext context)
     : IRequestContextBuilder<T>
-    where T : IExistActivePhase
 {
     public async Task BuildAsync(T request, CancellationToken cancellationToken)
     {
-        request.StrapiProjectInfo = await strapi.ReceiveProjectInfoAsync(
-            request.ProjectId,
-            request.FilterPhases);
+        if (request is not IPhaseRequest phaseRequest)
+            return;
 
-        if (request is IValidatedDynamoDbProjectInfo validated)
+        phaseRequest.Context = context;
+        context.ProjectId = phaseRequest.ProjectId;
+        context.FilterPhases = phaseRequest.FilterPhases;
+        context.PhaseId = phaseRequest.PhaseId;
+        context.UserAddress = phaseRequest.UserAddress;
+        context.WeiAmount = phaseRequest.WeiAmount;
+
+        context.StrapiProjectInfo = await strapi.ReceiveProjectInfoAsync(
+            context.ProjectId,
+            context.FilterPhases);
+
+        if (phaseRequest is not AdminGetAllocationRequest && phaseRequest is not MyUpcomingAllocationRequest)
         {
-            validated.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(
-                request.ProjectId,
+            context.DynamoDbProjectsInfo = await dynamoDb.LoadAsync<ProjectsInformation>(
+                context.ProjectId,
                 cancellationToken);
         }
 
-        if (request is IWhiteListUser whiteListUser && request.StrapiProjectInfo.CurrentPhase != null)
+        if (context.UserAddress != null && context.StrapiProjectInfo.CurrentPhase != null)
         {
-            whiteListUser.WhiteList = await dynamoDb.LoadAsync<WhiteList>(
-                WhiteList.CalculateHashId(request.ProjectId, request.StrapiProjectInfo.CurrentPhase.Start!.Value),
-                whiteListUser.UserAddress.Address,
+            context.WhiteList = await dynamoDb.LoadAsync<WhiteList>(
+                WhiteList.CalculateHashId(context.ProjectId, context.StrapiProjectInfo.CurrentPhase.Start!.Value),
+                context.UserAddress.Address,
                 cancellationToken);
         }
     }

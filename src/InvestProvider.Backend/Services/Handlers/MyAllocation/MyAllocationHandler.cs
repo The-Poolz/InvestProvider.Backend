@@ -7,11 +7,12 @@ public class MyAllocationHandler : IRequestHandler<MyAllocationRequest, MyAlloca
 {
     public Task<MyAllocationResponse> Handle(MyAllocationRequest request, CancellationToken cancellationToken)
     {
+        var ctx = request.Context;
         var response = new MyAllocationResponse(
-            amount: request.WhiteList?.Amount ?? (decimal)request.StrapiProjectInfo.CurrentPhase!.MaxInvest!,
-            startTime: request.StrapiProjectInfo.CurrentPhase!.Start!.Value,
-            endTime: request.StrapiProjectInfo.CurrentPhase.Finish!.Value,
-            poolzBackId: request.DynamoDbProjectsInfo.PoolzBackId
+            amount: ctx.WhiteList?.Amount ?? (decimal)ctx.StrapiProjectInfo!.CurrentPhase!.MaxInvest!,
+            startTime: ctx.StrapiProjectInfo!.CurrentPhase!.Start!.Value,
+            endTime: ctx.StrapiProjectInfo!.CurrentPhase!.Finish!.Value,
+            poolzBackId: ctx.DynamoDbProjectsInfo!.PoolzBackId
         );
         return Task.FromResult(response);
     }
