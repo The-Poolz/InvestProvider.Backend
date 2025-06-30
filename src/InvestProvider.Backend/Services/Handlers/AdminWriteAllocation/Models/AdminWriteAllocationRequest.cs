@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Poolz.Finance.CSharp.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
-using InvestProvider.Backend.Services.Validators.Models;
+using InvestProvider.Backend.Services.Handlers.Contexts;
 using ProjectsInformation = InvestProvider.Backend.Services.DynamoDb.Models.ProjectsInformation;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminWriteAllocation.Models;

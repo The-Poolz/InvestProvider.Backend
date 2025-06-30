@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Net.Web3.EthereumWallet;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
+using InvestProvider.Backend.Services.Handlers.Contexts;
 using InvestProvider.Backend.Services.Web3.Contracts.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;

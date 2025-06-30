@@ -1,7 +1,7 @@
 using FluentValidation;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
+using InvestProvider.Backend.Services.Handlers.Contexts;
 
 namespace InvestProvider.Backend.Services.Handlers;
 

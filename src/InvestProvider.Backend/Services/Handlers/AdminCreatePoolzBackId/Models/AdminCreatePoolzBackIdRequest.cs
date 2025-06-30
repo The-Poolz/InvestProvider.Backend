@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Amazon.DynamoDBv2.DataModel;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.DynamoDb.Models;
-using InvestProvider.Backend.Services.Validators.Models;
+using InvestProvider.Backend.Services.Handlers.Contexts;
 
 namespace InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
 
