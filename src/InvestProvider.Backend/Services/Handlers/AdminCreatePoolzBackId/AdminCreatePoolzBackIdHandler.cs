@@ -25,7 +25,9 @@ public class AdminCreatePoolzBackIdHandler(
 
         var onChainInfo = await strapi.ReceiveOnChainInfoAsync(request.ChainId);
 
-        _ = erc20Cache.GetOrAdd(new GetCacheRequest(request.ChainId, token, onChainInfo.RpcUrl));
+        var tokenInfo = erc20Cache.GetOrAdd(new GetCacheRequest(request.ChainId, token, onChainInfo.RpcUrl));
+
+        request.TokenHashKey = tokenInfo.HashKey;
 
         await dynamoDb.SaveAsync(request, cancellationToken);
 
