@@ -15,5 +15,5 @@ public class ProjectsInformation
     public long PoolzBackId { get; set; }
 
     [DynamoDBProperty("TokenHashKey")]
-    public string TokenHashKey { get; set; }
+    public string TokenHashKey { get; set; } = null!;
 }
