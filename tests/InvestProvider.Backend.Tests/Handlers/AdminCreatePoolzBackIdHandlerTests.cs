@@ -25,7 +25,7 @@ public class AdminCreatePoolzBackIdHandlerTests
     {
         Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
 
-        var phase = TestHelpers.CreatePhase("1", System.DateTime.UtcNow, System.DateTime.UtcNow.AddHours(1), 0m);
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
         var dynamoDb = new Mock<IDynamoDBContext>();
         var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
