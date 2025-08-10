@@ -13,4 +13,7 @@ public class ProjectsInformation
     [JsonRequired]
     [DynamoDBProperty("PoolzBackId")]
     public long PoolzBackId { get; set; }
+
+    [DynamoDBProperty("TokenHashKey")]
+    public string TokenHashKey { get; set; } = null!;
 }
