@@ -1,8 +1,6 @@
 using FluentValidation;
 using Net.Utils.ErrorHandler.Extensions;
-using Amazon.DynamoDBv2.DataModel;
 using Net.Cache.DynamoDb.ERC20;
-using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using poolz.finance.csharp.contracts.LockDealNFT;
@@ -19,13 +17,11 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
     private readonly IInvestProviderService<ContractType> _investProvider;
 
     public GenerateSignatureRequestValidator(
-        IStrapiClient strapi,
-        IDynamoDBContext dynamoDb,
         IRpcProvider rpcProvider,
         ERC20CacheProvider erc20Cache,
         ILockDealNFTService<ContractType> lockDealNFT,
         IInvestProviderService<ContractType> investProvider
-    ) : base(strapi, dynamoDb)
+    )
     {
         _rpcProvider = rpcProvider;
         _erc20Cache = erc20Cache;
@@ -39,9 +35,9 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
-            .Must(NotNullCurrentPhase)
+            .Must(HasCurrentPhase)
             .WithError(Error.NOT_FOUND_ACTIVE_PHASE, x => new { x.ProjectId })
-            .MustAsync(NotNullProjectsInformationAsync)
+            .Must(HasProjectsInformation)
             .WithError(Error.POOLZ_BACK_ID_NOT_FOUND, x => new { x.ProjectId })
             .MustAsync(MustMoreThanAllowedMinimumAsync)
             .WithError(Error.INVEST_AMOUNT_IS_LESS_THAN_ALLOWED, x => new
@@ -61,7 +57,7 @@ public partial class GenerateSignatureRequestValidator : BasePhaseValidator<Gene
 
         RuleFor(x => x)
             .Cascade(CascadeMode.Stop)
-            .MustAsync(NotNullWhiteListAsync)
+            .Must(HasWhiteList)
             .WithError(Error.NOT_IN_WHITE_LIST, x => new { x.ProjectId, PhaseId = x.StrapiProjectInfo.CurrentPhase!.Id, UserAddress = x.UserAddress.Address })
             .Must(x => x.Amount + x.InvestedAmount <= x.WhiteList.Amount)
             .WithError(Error.AMOUNT_EXCEED_MAX_WHITE_LIST_AMOUNT, x => new
