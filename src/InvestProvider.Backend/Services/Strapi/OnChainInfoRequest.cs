@@ -37,7 +37,6 @@ public static class OnChainInfoRequest
         var queryBuilder = new QueryQueryBuilder()
             .WithChains(new ChainQueryBuilder()
                 .WithContractsOnChain(new ContractsOnChainQueryBuilder()
-                    .WithRpc()
                     .WithContracts(new ComponentContractOnChainContractOnChainQueryBuilder()
                         .WithContractVersion(new ContractQueryBuilder()
                             .WithNameVersion()

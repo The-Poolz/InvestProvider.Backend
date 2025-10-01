@@ -1,5 +1,6 @@
 ﻿using Nethereum.Web3;
 using System.Collections.Concurrent;
+using EnvironmentManager.Extensions;
 using NethereumGenerators.Interfaces;
 using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
@@ -14,7 +15,7 @@ public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>,
 
     public string RpcUrl(long chainId)
     {
-        return FetchChainInfo(chainId).RpcUrl;
+        return $"{Env.BASE_URL_OF_RPC.GetRequired()}{chainId}";
     }
 
     public IWeb3 Web3(long chainId)

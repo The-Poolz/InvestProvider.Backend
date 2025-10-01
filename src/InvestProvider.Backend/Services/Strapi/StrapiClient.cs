@@ -49,7 +49,7 @@ public class StrapiClient : IStrapiClient
         var investedProvider = ExtractAddress(chain, ContractNames.InvestProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED);
         var lockDealNFT = ExtractAddress(chain, ContractNames.LockDealNFT, Error.LOCK_DEAL_NFT_NOT_SUPPORTED);
 
-        return new OnChainInfo(chain.ContractsOnChain.Rpc, investedProvider, lockDealNFT);
+        return new OnChainInfo(investedProvider, lockDealNFT);
     }
 
     public async Task<ProjectInfo> ReceiveProjectInfoAsync(string projectId, bool filterPhases)
