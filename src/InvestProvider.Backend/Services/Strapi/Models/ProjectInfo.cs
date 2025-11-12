@@ -7,8 +7,6 @@ public class ProjectInfo
 {
     public ProjectInfo(ProjectInfoResponse graphQlResponse, string projectId)
     {
-        ArgumentNullException.ThrowIfNull(graphQlResponse);
-
         var projectsInformation = graphQlResponse.ProjectsInfo
             ?? throw Error.STRAPI_MISSING_PROJECT_DATA.ToException(new
             {

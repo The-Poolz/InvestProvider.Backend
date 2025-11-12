@@ -64,7 +64,7 @@ public class StrapiClient : IStrapiClient
             });
         }
 
-        return new ProjectInfo(response.Data);
+        return new ProjectInfo(response.Data, projectId);
     }
 
     private async Task<GraphQLResponse<TResponse>> SendQueryAsync<TResponse>(GraphQLRequest request)
