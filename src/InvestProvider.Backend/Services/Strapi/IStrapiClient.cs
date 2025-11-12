@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using InvestProvider.Backend.Services.Strapi.Models;
+﻿using InvestProvider.Backend.Services.Strapi.Models;
 
 namespace InvestProvider.Backend.Services.Strapi;
 

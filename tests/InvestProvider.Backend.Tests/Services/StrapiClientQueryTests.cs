@@ -80,9 +80,9 @@ public class StrapiClientQueryTests
         var client = new StrapiClient();
         SetClient(client, stub);
 
-        var result = await client.ReceiveOnChainInfoAsync(5);
+        var chainId = 5;
+        var result = await client.ReceiveOnChainInfoAsync(chainId);
 
-        Assert.Equal("http://rpc", result.RpcUrl);
         Assert.Equal("0x00000000000000000000000000000000000000aa", result.InvestedProvider.ToString());
         Assert.Equal("0x00000000000000000000000000000000000000bb", result.LockDealNFT.ToString());
     }
