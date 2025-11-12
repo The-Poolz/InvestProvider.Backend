@@ -2,4 +2,4 @@
 
 namespace InvestProvider.Backend.Services.Strapi.Models;
 
-public record OnChainInfo(string RpcUrl, EthereumAddress InvestedProvider, EthereumAddress LockDealNFT);
+public record OnChainInfo(EthereumAddress InvestedProvider, EthereumAddress LockDealNFT);

@@ -35,7 +35,6 @@ public class AdminCreatePoolzBackIdHandlerTests
         var strapi = new Mock<IStrapiClient>();
         strapi.Setup(x => x.ReceiveOnChainInfoAsync(1))
             .ReturnsAsync(new OnChainInfo(
-                "http://rpc",
                 new EthereumAddress("0x00000000000000000000000000000000000000bb"),
                 new EthereumAddress("0x00000000000000000000000000000000000000cc")
             ));
@@ -44,11 +43,7 @@ public class AdminCreatePoolzBackIdHandlerTests
         erc20.Setup(x => x.GetOrAdd(It.IsAny<GetCacheRequest>()))
             .Returns(new ERC20DynamoDbTable());
 
-        var handler = new AdminCreatePoolzBackIdHandler(
-            dynamoDb.Object,
-            lockDealNFT.Object,
-            strapi.Object,
-            erc20.Object);
+        var handler = new AdminCreatePoolzBackIdHandler(dynamoDb.Object, lockDealNFT.Object, erc20.Object);
         var request = new AdminCreatePoolzBackIdRequest
         {
             ProjectId = "pid",
