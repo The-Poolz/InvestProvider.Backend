@@ -44,7 +44,7 @@ public static class TestHelpers
         projectsInfoType.GetProperty("ProjectPhases")?.SetValue(projectsInfo, phasesList);
 
         var projectInfoResponse = new ProjectInfoResponse((dynamic)projectsInfo);
-        return new ProjectInfo(projectInfoResponse);
+        return new ProjectInfo(projectInfoResponse, "projectId");
     }
 
     public static ProjectInfo CreateProjectInfo(long chainId, IList phases)
@@ -64,6 +64,6 @@ public static class TestHelpers
         projectsInfoType.GetProperty("ProjectPhases")?.SetValue(projectsInfo, phases);
 
         var projectInfoResponse = new ProjectInfoResponse((dynamic)projectsInfo);
-        return new ProjectInfo(projectInfoResponse);
+        return new ProjectInfo(projectInfoResponse, "projectId");
     }
 }

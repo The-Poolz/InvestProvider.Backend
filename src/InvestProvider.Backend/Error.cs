@@ -37,5 +37,9 @@ public enum Error
     [Error("Selected phase already finished.")]
     PHASE_FINISHED,
     [Error("Pool must be InvestProvider.")]
-    INVALID_POOL_TYPE
+    INVALID_POOL_TYPE,
+    [Error("Project information is missing in Strapi response.")]
+    STRAPI_MISSING_PROJECT_DATA,
+    [Error("ChainSetting/Chain is missing in project, to receive project ChainId.")]
+    STRAPI_MISSING_CHAIN_DATA
 }
