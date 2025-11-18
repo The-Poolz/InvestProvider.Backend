@@ -20,6 +20,7 @@ using poolz.finance.csharp.contracts.InvestProvider;
 using poolz.finance.csharp.contracts.InvestProvider.ContractDefinition;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
+using System.Collections.Generic;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -58,6 +59,8 @@ public class GenerateSignatureValidatorTests
     [Fact]
     public async Task Validate_Succeeds_ForWhitelistPhase()
     {
+        using var _ = EnvironmentVariableScope.Set("AWS_REGION", "us-east-1");
+
         var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
@@ -65,7 +68,6 @@ public class GenerateSignatureValidatorTests
         strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", It.IsAny<bool>())).ReturnsAsync(projectInfo);
 
         var dynamoDb = new Mock<IDynamoDBContext>();
-        Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
         var start = (DateTime)((dynamic)phase).Start;
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
@@ -87,6 +89,8 @@ public class GenerateSignatureValidatorTests
     [Fact]
     public async Task Validate_Throws_WhenAmountLessThanMinimum()
     {
+        using var _ = EnvironmentVariableScope.Set("AWS_REGION", "us-east-1");
+
         var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
 
@@ -97,7 +101,6 @@ public class GenerateSignatureValidatorTests
         var start = (DateTime)((dynamic)phase).Start;
         dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
-        Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
         dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", start), "0x0000000000000000000000000000000000000123", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new WhiteList("pid", start, new EthereumAddress("0x0000000000000000000000000000000000000123"), 10));
 
