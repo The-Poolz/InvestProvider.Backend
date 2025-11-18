@@ -15,6 +15,7 @@ using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
+using System.Collections.Generic;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -23,7 +24,11 @@ public class AdminCreatePoolzBackIdHandlerTests
     [Fact]
     public async Task Handle_SavesItem_AndReturnsResponse()
     {
-        Environment.SetEnvironmentVariable("AWS_REGION", "us-east-1");
+        using var _ = EnvironmentVariableScope.Set(new Dictionary<string, string?>
+        {
+            ["AWS_REGION"] = "us-east-1",
+            ["BASE_URL_OF_RPC"] = "http://rpc",
+        });
 
         var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
         var projectInfo = TestHelpers.CreateProjectInfo(1, phase);

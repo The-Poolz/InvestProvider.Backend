@@ -50,7 +50,7 @@ public class StrapiClientQueryTests
     [Fact]
     public async Task ReceiveOnChainInfoAsync_ReturnsInfo()
     {
-        Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
+        using var _ = EnvironmentVariableScope.Set("STRAPI_GRAPHQL_URL", "http://localhost");
 
         var chain = new Chain
         {
@@ -90,7 +90,8 @@ public class StrapiClientQueryTests
     [Fact]
     public async Task ReceiveOnChainInfoAsync_Throws_WhenChainMissing()
     {
-        Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
+        using var _ = EnvironmentVariableScope.Set("STRAPI_GRAPHQL_URL", "http://localhost");
+
         var gqlResponse = new GraphQLResponse<OnChainInfoResponse> { Data = new OnChainInfoResponse(Array.Empty<Chain>()) };
         var handler = new StubMessageHandler(gqlResponse);
         var stub = new GraphQLHttpClient(new GraphQLHttpClientOptions { EndPoint = new Uri("http://localhost") }, new NewtonsoftJsonSerializer(), new HttpClient(handler));
@@ -103,7 +104,7 @@ public class StrapiClientQueryTests
     [Fact]
     public async Task ReceiveProjectInfoAsync_ReturnsInfo()
     {
-        Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
+        using var _ = EnvironmentVariableScope.Set("STRAPI_GRAPHQL_URL", "http://localhost");
 
         var phaseType = Type.GetType("Poolz.Finance.CSharp.Strapi.ComponentPhaseStartEndAmount, Poolz.Finance.CSharp.Strapi")!;
         var phase = Activator.CreateInstance(phaseType)!;
@@ -139,7 +140,8 @@ public class StrapiClientQueryTests
     [Fact]
     public async Task ReceiveProjectInfoAsync_Throws_WhenProjectMissing()
     {
-        Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
+        using var _ = EnvironmentVariableScope.Set("STRAPI_GRAPHQL_URL", "http://localhost");
+
         var gqlResponse = new GraphQLResponse<ProjectInfoResponse> { Data = new ProjectInfoResponse(null!) };
         var handler = new StubMessageHandler(gqlResponse);
         var stub = new GraphQLHttpClient(new GraphQLHttpClientOptions { EndPoint = new Uri("http://localhost") }, new NewtonsoftJsonSerializer(), new HttpClient(handler));
@@ -152,7 +154,7 @@ public class StrapiClientQueryTests
     [Fact]
     public void SendQuery_Throws_OnGraphQlErrors()
     {
-        Environment.SetEnvironmentVariable("STRAPI_GRAPHQL_URL", "http://localhost");
+        using var _ = EnvironmentVariableScope.Set("STRAPI_GRAPHQL_URL", "http://localhost");
 
         var errorResp = new GraphQLResponse<OnChainInfoResponse>
         {
