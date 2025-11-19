@@ -11,18 +11,19 @@
     <PublishReadyToRun>true</PublishReadyToRun>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Amazon.Lambda.Core" Version="2.2.0" />
-    <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="2.2.3" />
+    <PackageReference Include="Amazon.Lambda.Core" Version="2.8.0" />
+    <PackageReference Include="Amazon.Lambda.Serialization.Json" Version="2.2.4" />
     <PackageReference Include="MediatR" Version="12.5.0" />
     <PackageReference Include="MediatR.Extensions.FluentValidation.AspNetCore" Version="6.0.0" />
-    <PackageReference Include="Net.Cache.DynamoDb.ERC20" Version="1.3.5" />
+    <PackageReference Include="Net.Cache.DynamoDb.ERC20" Version="2.0.2" />
     <PackageReference Include="Net.Utils.ErrorHandler" Version="1.0.2" />
-    <PackageReference Include="Net.Web3.EthereumWallet" Version="1.2.0" />
-    <PackageReference Include="Net.Web3.EthereumWallet.Json" Version="1.2.0" />
-    <PackageReference Include="Nethereum.Web3" Version="4.29.0" />
+    <PackageReference Include="Net.Web3.EthereumWallet" Version="1.2.2" />
+    <PackageReference Include="Net.Web3.EthereumWallet.Json" Version="1.2.2" />
+    <PackageReference Include="Nethereum.Web3" Version="5.0.0" />
     <PackageReference Include="poolz.finance.csharp.contracts" Version="1.2.1" />
+    <PackageReference Include="Poolz.Finance.CSharp.Http" Version="1.0.0" />
     <PackageReference Include="Poolz.Finance.CSharp.Strapi" Version="1.3.1" />
-    <PackageReference Include="SecretsManager" Version="1.0.0" />
+    <PackageReference Include="SecretsManager" Version="1.0.1" />
     <PackageReference Include="Utils.EnvironmentManager" Version="4.2.0" />
   </ItemGroup>
 </Project>

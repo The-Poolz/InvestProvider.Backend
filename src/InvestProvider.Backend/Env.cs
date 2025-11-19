@@ -9,5 +9,6 @@ public enum Env
     MIN_INVEST_AMOUNT,
     MAX_PARALLEL,
     BATCH_SIZE,
-    BASE_URL_OF_RPC
+    BASE_URL_OF_RPC,
+    MULTI_CALL_V3_ADDRESS
 }
