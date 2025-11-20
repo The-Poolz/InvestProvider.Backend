@@ -1,21 +1,26 @@
 using Moq;
 using Xunit;
 using System;
+using Nethereum.Web3;
+using System.Net.Http;
 using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using Nethereum.RPC.Eth.DTOs;
+using System.Net.Http.Headers;
 using Net.Web3.EthereumWallet;
 using Net.Cache.DynamoDb.ERC20;
+using Poolz.Finance.CSharp.Http;
+using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
-using Net.Cache.DynamoDb.ERC20.Models;
+using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
+using Net.Cache.DynamoDb.ERC20.DynamoDb.Models;
 using poolz.finance.csharp.contracts.LockDealNFT;
 using InvestProvider.Backend.Services.Strapi.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId;
 using InvestProvider.Backend.Services.Handlers.AdminCreatePoolzBackId.Models;
-using System.Collections.Generic;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -28,6 +33,7 @@ public class AdminCreatePoolzBackIdHandlerTests
         {
             ["AWS_REGION"] = "us-east-1",
             ["BASE_URL_OF_RPC"] = "http://rpc",
+            [nameof(Env.MULTI_CALL_V3_ADDRESS)] = "0x0000000000000000000000000000000000000000"
         });
 
         var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
@@ -44,11 +50,20 @@ public class AdminCreatePoolzBackIdHandlerTests
                 new EthereumAddress("0x00000000000000000000000000000000000000cc")
             ));
 
-        var erc20 = new Mock<ERC20CacheProvider>();
-        erc20.Setup(x => x.GetOrAdd(It.IsAny<GetCacheRequest>()))
-            .Returns(new ERC20DynamoDbTable());
+        var erc20 = new Mock<IErc20CacheService>();
+        erc20.Setup(x => x.GetOrAddAsync(
+                It.IsAny<HashKey>(),
+                It.IsAny<Func<Task<IWeb3>>>(),
+                It.IsAny<Func<Task<EthereumAddress>>>()
+            ))
+            .ReturnsAsync(new Erc20TokenDynamoDbEntry { HashKey = "hash" });
 
-        var handler = new AdminCreatePoolzBackIdHandler(dynamoDb.Object, lockDealNFT.Object, erc20.Object);
+        var httpClientFactory = new Mock<IHttpClientFactory>();
+        httpClientFactory.Setup(x => x.Create(It.IsAny<string>(), It.IsAny<Action<HttpRequestHeaders>>())).Returns(new HttpClient());
+
+        var chainProvider = new ChainProvider(strapi.Object, httpClientFactory.Object);
+
+        var handler = new AdminCreatePoolzBackIdHandler(dynamoDb.Object, lockDealNFT.Object, erc20.Object, chainProvider);
         var request = new AdminCreatePoolzBackIdRequest
         {
             ProjectId = "pid",
