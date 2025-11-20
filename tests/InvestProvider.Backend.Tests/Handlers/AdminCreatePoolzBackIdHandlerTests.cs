@@ -13,6 +13,7 @@ using Net.Cache.DynamoDb.ERC20;
 using Poolz.Finance.CSharp.Http;
 using System.Collections.Generic;
 using Amazon.DynamoDBv2.DataModel;
+using NethereumGenerators.Interfaces;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
 using Net.Cache.DynamoDb.ERC20.DynamoDb.Models;
@@ -77,5 +78,49 @@ public class AdminCreatePoolzBackIdHandlerTests
         dynamoDb.Verify(x => x.SaveAsync(request, CancellationToken.None), Times.Once);
         Assert.Equal("pid", result.ProjectId);
         Assert.Equal(42, result.PoolzBackId);
+    }
+
+    [Fact]
+    public async Task Handle_AssignsTokenHashKey_AndUsesChainProviderWeb3()
+    {
+        using var _ = EnvironmentVariableScope.Set(new Dictionary<string, string?>
+        {
+            ["AWS_REGION"] = "us-east-1",
+            [nameof(Env.MULTI_CALL_V3_ADDRESS)] = "0x0000000000000000000000000000000000000000"
+        });
+
+        var web3 = Mock.Of<IWeb3>();
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
+        var dynamoDb = new Mock<IDynamoDBContext>();
+        var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
+        lockDealNFT.Setup(x => x.TokenOfQueryAsync(1, ContractType.LockDealNFT, 9, It.IsAny<BlockParameter>()))
+            .ReturnsAsync(new EthereumAddress("0x0000000000000000000000000000000000000099"));
+
+        var chainProvider = new Mock<IChainProvider<ContractType>>();
+        chainProvider.Setup(x => x.Web3(1)).Returns(web3);
+
+        var erc20 = new Mock<IErc20CacheService>();
+        erc20.Setup(x => x.GetOrAddAsync(
+                It.IsAny<HashKey>(),
+                It.IsAny<Func<Task<IWeb3>>>(),
+                It.IsAny<Func<Task<EthereumAddress>>>()
+            ))
+            .ReturnsAsync(new Erc20TokenDynamoDbEntry { HashKey = "assigned" });
+
+        var handler = new AdminCreatePoolzBackIdHandler(dynamoDb.Object, lockDealNFT.Object, erc20.Object, chainProvider.Object);
+        var request = new AdminCreatePoolzBackIdRequest
+        {
+            ProjectId = "pid",
+            PoolzBackId = 9,
+            ChainId = 1,
+            StrapiProjectInfo = projectInfo
+        };
+
+        var response = await handler.Handle(request, CancellationToken.None);
+
+        Assert.Equal("assigned", request.TokenHashKey);
+        Assert.Equal("pid", response.ProjectId);
+        Assert.Equal(9, response.PoolzBackId);
     }
 }

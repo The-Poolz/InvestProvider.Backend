@@ -1,27 +1,27 @@
-using System;
-using System.Numerics;
-using System.Threading;
-using System.Threading.Tasks;
-using Amazon.DynamoDBv2.DataModel;
 using Moq;
 using Xunit;
+using System;
+using Nethereum.Web3;
+using System.Numerics;
+using System.Threading;
 using FluentValidation;
-using Net.Web3.EthereumWallet;
-using InvestProvider.Backend.Services.Strapi;
-using InvestProvider.Backend.Services.Strapi.Models;
-using InvestProvider.Backend.Services.DynamoDb.Models;
-using Net.Cache.DynamoDb.ERC20;
+using System.Threading.Tasks;
 using Nethereum.RPC.Eth.DTOs;
-using InvestProvider.Backend.Services.Web3.Contracts;
+using Net.Web3.EthereumWallet;
+using Net.Cache.DynamoDb.ERC20;
+using System.Collections.Generic;
+using Amazon.DynamoDBv2.DataModel;
+using NethereumGenerators.Interfaces;
+using InvestProvider.Backend.Services.Strapi;
+using Net.Cache.DynamoDb.ERC20.DynamoDb.Models;
 using poolz.finance.csharp.contracts.LockDealNFT;
 using poolz.finance.csharp.contracts.InvestProvider;
-using poolz.finance.csharp.contracts.InvestProvider.ContractDefinition;
+using InvestProvider.Backend.Services.Strapi.Models;
+using InvestProvider.Backend.Services.Web3.Contracts;
+using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature;
+using poolz.finance.csharp.contracts.InvestProvider.ContractDefinition;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
-using Net.Cache.DynamoDb.ERC20.DynamoDb.Models;
-using Nethereum.Web3;
-using NethereumGenerators.Interfaces;
-using System.Collections.Generic;
 
 namespace InvestProvider.Backend.Tests.Handlers;
 
@@ -134,5 +134,85 @@ public class GenerateSignatureValidatorTests
         };
 
         await Assert.ThrowsAsync<ValidationException>(() => validator.ValidateAndThrowAsync(request));
+    }
+
+    [Fact]
+    public async Task Validate_AllowsAmount_WhenEqualsMinimum()
+    {
+        using var _ = EnvironmentVariableScope.Set(new Dictionary<string, string?>
+        {
+            ["AWS_REGION"] = "us-east-1",
+            [nameof(Env.MULTI_CALL_V3_ADDRESS)] = "0x0000000000000000000000000000000000000000",
+            [nameof(Env.MIN_INVEST_AMOUNT)] = "2"
+        });
+
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 0m);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
+        var strapi = new Mock<IStrapiClient>();
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", It.IsAny<bool>())).ReturnsAsync(projectInfo);
+
+        var dynamoDb = new Mock<IDynamoDBContext>();
+        var start = (DateTime)((dynamic)phase).Start;
+        dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
+        dynamoDb.Setup(x => x.LoadAsync<WhiteList>(WhiteList.CalculateHashId("pid", start), "0x0000000000000000000000000000000000000123", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new WhiteList("pid", start, new EthereumAddress("0x0000000000000000000000000000000000000123"), 10));
+
+        var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
+        var erc20 = new Mock<IErc20CacheService>();
+        var chainProvider = new Mock<IChainProvider<ContractType>>();
+        var investProvider = new Mock<IInvestProviderService<ContractType>>();
+        SetupCommonMocks(lockDealNFT, erc20, chainProvider, investProvider);
+
+        var validator = new GenerateSignatureRequestValidator(strapi.Object, dynamoDb.Object, chainProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
+        var request = new GenerateSignatureRequest("pid", new EthereumAddress("0x0000000000000000000000000000000000000123"), "2000000000000000000")
+        {
+            StrapiProjectInfo = projectInfo,
+            DynamoDbProjectsInfo = new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 }
+        };
+
+        await validator.ValidateAndThrowAsync(request);
+        Assert.Equal(2, request.Amount);
+    }
+
+    [Fact]
+    public async Task Validate_Throws_WhenAlreadyInvestedInPhase()
+    {
+        using var _ = EnvironmentVariableScope.Set(new Dictionary<string, string?>
+        {
+            ["AWS_REGION"] = "us-east-1",
+            [nameof(Env.MULTI_CALL_V3_ADDRESS)] = "0x0000000000000000000000000000000000000000"
+        });
+
+        var phase = TestHelpers.CreatePhase("1", DateTime.UtcNow, DateTime.UtcNow.AddHours(1), 5m);
+        var projectInfo = TestHelpers.CreateProjectInfo(1, phase);
+        var strapi = new Mock<IStrapiClient>();
+        strapi.Setup(x => x.ReceiveProjectInfoAsync("pid", It.IsAny<bool>())).ReturnsAsync(projectInfo);
+
+        var dynamoDb = new Mock<IDynamoDBContext>();
+        dynamoDb.Setup(x => x.LoadAsync<ProjectsInformation>("pid", It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new ProjectsInformation { ProjectId = "pid", PoolzBackId = 5 });
+
+        var lockDealNFT = new Mock<ILockDealNFTService<ContractType>>();
+        var erc20 = new Mock<IErc20CacheService>();
+        var chainProvider = new Mock<IChainProvider<ContractType>>();
+        var investProvider = new Mock<IInvestProviderService<ContractType>>();
+        SetupCommonMocks(lockDealNFT, erc20, chainProvider, investProvider);
+
+        investProvider.Setup(x => x.GetUserInvestsQueryAsync(1, ContractType.InvestedProvider, 5, "0x0000000000000000000000000000000000000123", It.IsAny<BlockParameter>()))
+            .ReturnsAsync(new GetUserInvestsOutputDTO
+            {
+                ReturnValue1 =
+                [
+                    new UserInvest { Amount = BigInteger.Parse("1000000000000000000"), BlockTimestamp = new BigInteger(new DateTimeOffset(DateTime.UtcNow.AddMinutes(1)).ToUnixTimeSeconds()) },
+                    new UserInvest { Amount = BigInteger.Parse("1000000000000000000"), BlockTimestamp = new BigInteger(new DateTimeOffset(DateTime.UtcNow.AddMinutes(10)).ToUnixTimeSeconds()) }
+                ]
+            });
+
+        var validator = new GenerateSignatureRequestValidator(strapi.Object, dynamoDb.Object, chainProvider.Object, erc20.Object, lockDealNFT.Object, investProvider.Object);
+        var request = CreateRequest(projectInfo);
+
+        await Assert.ThrowsAsync<ValidationException>(() => validator.ValidateAndThrowAsync(request));
+        Assert.Equal(2, request.InvestedAmount);
     }
 }

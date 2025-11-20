@@ -15,7 +15,7 @@ public class ChainProvider(IStrapiClient strapi, IHttpClientFactory httpClientFa
 {
     private readonly ConcurrentDictionary<long, Lazy<OnChainInfo>> ChainsInfo = new();
 
-    public string RpcUrl(long chainId)
+    public static string RpcUrl(long chainId)
     {
         return $"{Env.BASE_URL_OF_RPC.GetRequired()}{chainId}";
     }
