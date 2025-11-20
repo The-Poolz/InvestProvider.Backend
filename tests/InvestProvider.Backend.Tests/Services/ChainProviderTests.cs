@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Net.Web3.EthereumWallet;
 using Poolz.Finance.CSharp.Http;
+using System.Collections.Generic;
 using InvestProvider.Backend.Services.Web3;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
@@ -18,8 +19,12 @@ public class ChainProviderTests
     public void RpcUrl_IsFetched_FromStrapi_AndCached()
     {
         var baseRpcUrl = "http://rpc/evm/";
+        using var _ = EnvironmentVariableScope.Set(new Dictionary<string, string?>
+        {
+            [nameof(Env.BASE_URL_OF_RPC)] = baseRpcUrl,
+            [nameof(Env.MULTI_CALL_V3_ADDRESS)] = "0x0000000000000000000000000000000000000000"
+        });
         var chainId = 56;
-        Environment.SetEnvironmentVariable(nameof(Env.BASE_URL_OF_RPC), baseRpcUrl);
 
         var provider = new ChainProvider(Mock.Of<IStrapiClient>(), MockHttpClientFactory());
 
