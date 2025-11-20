@@ -1,33 +1,33 @@
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
-using Amazon.DynamoDBv2.DataModel;
 using Net.Cache.DynamoDb.ERC20;
+using Amazon.DynamoDBv2.DataModel;
+using NethereumGenerators.Interfaces;
+using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
-using InvestProvider.Backend.Services.Web3;
-using InvestProvider.Backend.Services.Web3.Contracts;
 using poolz.finance.csharp.contracts.LockDealNFT;
 using poolz.finance.csharp.contracts.InvestProvider;
+using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
 
 namespace InvestProvider.Backend.Services.Handlers.GenerateSignature;
 
 public partial class GenerateSignatureRequestValidator : BasePhaseValidator<GenerateSignatureRequest>
 {
-    private readonly IRpcProvider _rpcProvider;
-    private readonly ERC20CacheProvider _erc20Cache;
+    private readonly IChainProvider<ContractType> _chainProvider;
+    private readonly IErc20CacheService _erc20Cache;
     private readonly ILockDealNFTService<ContractType> _lockDealNFT;
     private readonly IInvestProviderService<ContractType> _investProvider;
 
     public GenerateSignatureRequestValidator(
         IStrapiClient strapi,
         IDynamoDBContext dynamoDb,
-        IRpcProvider rpcProvider,
-        ERC20CacheProvider erc20Cache,
+        IChainProvider<ContractType> chainProvider,
+        IErc20CacheService erc20Cache,
         ILockDealNFTService<ContractType> lockDealNFT,
         IInvestProviderService<ContractType> investProvider
     ) : base(strapi, dynamoDb)
     {
-        _rpcProvider = rpcProvider;
+        _chainProvider = chainProvider;
         _erc20Cache = erc20Cache;
         _lockDealNFT = lockDealNFT;
         _investProvider = investProvider;

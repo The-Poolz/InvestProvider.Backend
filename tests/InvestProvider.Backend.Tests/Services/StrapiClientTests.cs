@@ -1,11 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Reflection;
-using FluentValidation;
-using Net.Web3.EthereumWallet;
-using Poolz.Finance.CSharp.Strapi;
 using Xunit;
-using InvestProvider.Backend.Services;
+using System;
+using FluentValidation;
+using System.Reflection;
+using Net.Web3.EthereumWallet;
+using System.Collections.Generic;
+using Poolz.Finance.CSharp.Strapi;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Web3.Contracts;
 
@@ -29,7 +28,7 @@ public class StrapiClientTests
                     new ComponentContractOnChainContractOnChain
                     {
                         ContractVersion = new Contract { NameVersion = "InvestProvider v1" },
-                        Address = "0x00000000000000000000000000000000000000aa"
+                        Address = "0x00000000000000000000000000000000000000AA"
                     },
                     new ComponentContractOnChainContractOnChain
                     {
@@ -43,7 +42,7 @@ public class StrapiClientTests
         var method = typeof(StrapiClient).GetMethod("ExtractAddress", BindingFlags.NonPublic | BindingFlags.Static)!;
         var result = (EthereumAddress)method.Invoke(null, new object[] { chain, ContractNames.InvestProvider, Error.INVESTED_PROVIDER_NOT_SUPPORTED })!;
 
-        Assert.Equal("0x00000000000000000000000000000000000000aa", result.ToString());
+        Assert.Equal("0x00000000000000000000000000000000000000AA", result.ToString());
     }
 
     [Fact]

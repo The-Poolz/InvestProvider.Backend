@@ -1,4 +1,6 @@
 ﻿using Nethereum.Web3;
+using Nethereum.JsonRpc.Client;
+using Poolz.Finance.CSharp.Http;
 using System.Collections.Concurrent;
 using EnvironmentManager.Extensions;
 using NethereumGenerators.Interfaces;
@@ -9,18 +11,20 @@ using InvestProvider.Backend.Services.Web3.Contracts;
 
 namespace InvestProvider.Backend.Services.Web3;
 
-public class ChainProvider(IStrapiClient strapi) : IChainProvider<ContractType>, IRpcProvider
+public class ChainProvider(IStrapiClient strapi, IHttpClientFactory httpClientFactory) : IChainProvider<ContractType>
 {
     private readonly ConcurrentDictionary<long, Lazy<OnChainInfo>> ChainsInfo = new();
 
-    public string RpcUrl(long chainId)
+    public static string RpcUrl(long chainId)
     {
         return $"{Env.BASE_URL_OF_RPC.GetRequired()}{chainId}";
     }
 
     public IWeb3 Web3(long chainId)
     {
-        return new Nethereum.Web3.Web3(RpcUrl(chainId));
+        var rpcUrl = RpcUrl(chainId);
+        var httpClient = httpClientFactory.Create(rpcUrl);
+        return new Nethereum.Web3.Web3(new RpcClient(new Uri(rpcUrl), httpClient));
     }
 
     public string ContractAddress(long chainId, ContractType contractType)

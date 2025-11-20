@@ -1,6 +1,6 @@
 using FluentValidation;
-using Net.Utils.ErrorHandler.Extensions;
 using Amazon.DynamoDBv2.DataModel;
+using Net.Utils.ErrorHandler.Extensions;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.DynamoDb.Models;
 using InvestProvider.Backend.Services.Validators.Models;

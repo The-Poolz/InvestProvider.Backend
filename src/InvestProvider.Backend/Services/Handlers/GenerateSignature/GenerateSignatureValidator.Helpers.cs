@@ -1,8 +1,9 @@
+using Nethereum.Util;
 using System.Numerics;
 using FluentValidation;
-using Net.Cache.DynamoDb.ERC20.Models;
+using Net.Web3.EthereumWallet;
 using EnvironmentManager.Extensions;
-using Nethereum.Util;
+using Net.Cache.DynamoDb.ERC20.DynamoDb.Models;
 using InvestProvider.Backend.Services.Web3.Contracts;
 using InvestProvider.Backend.Services.Web3.Contracts.Models;
 using InvestProvider.Backend.Services.Handlers.GenerateSignature.Models;
@@ -21,11 +22,12 @@ public partial class GenerateSignatureRequestValidator
             model.DynamoDbProjectsInfo.PoolzBackId
         );
 
-        model.TokenDecimals = _erc20Cache.GetOrAdd(new GetCacheRequest(
-            model.StrapiProjectInfo.ChainId,
-            tokenAddress,
-            _rpcProvider.RpcUrl(model.StrapiProjectInfo.ChainId)
-        )).Decimals;
+        var web3 = _chainProvider.Web3(model.StrapiProjectInfo.ChainId);
+        model.TokenDecimals = _erc20Cache.GetOrAddAsync(
+            new HashKey(model.StrapiProjectInfo.ChainId, tokenAddress),
+            () => Task.FromResult(web3),
+            () => Task.FromResult<EthereumAddress>(Env.MULTI_CALL_V3_ADDRESS.GetRequired())
+        ).GetAwaiter().GetResult().Decimals;
 
         model.Amount = UnitConversion.Convert.FromWei(BigInteger.Parse(model.WeiAmount), model.TokenDecimals);
 

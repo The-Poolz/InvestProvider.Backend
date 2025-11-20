@@ -44,9 +44,9 @@ public class AdminGetAllocationHandlerTests
         };
         var hash1 = WhiteList.CalculateHashId("pid", start1);
         var hash2 = WhiteList.CalculateHashId("pid", start2);
-        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash1, null))
+        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash1))
                 .Returns(new StubAsyncSearch<WhiteList>(whiteLists1));
-        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash2, null))
+        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash2))
                 .Returns(new StubAsyncSearch<WhiteList>(whiteLists2));
 
         var handler = new AdminGetAllocationHandler(strapi.Object, dynamoDb.Object);
@@ -80,7 +80,7 @@ public class AdminGetAllocationHandlerTests
             new("pid", start, new EthereumAddress("0x0000000000000000000000000000000000000002"), 5),
         };
         var hash = WhiteList.CalculateHashId("pid", start);
-        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash, null))
+        dynamoDb.Setup(x => x.QueryAsync<WhiteList>(hash))
                 .Returns(new StubAsyncSearch<WhiteList>(whiteLists));
 
         var handler = new AdminGetAllocationHandler(strapi.Object, dynamoDb.Object);

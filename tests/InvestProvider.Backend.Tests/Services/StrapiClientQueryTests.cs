@@ -1,22 +1,18 @@
+using Xunit;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Text;
-using System.Collections;
-using Poolz.Finance.CSharp.Strapi;
-using FluentValidation;
 using GraphQL;
+using System.Net.Http;
+using System.Threading;
+using FluentValidation;
+using System.Reflection;
+using System.Collections;
 using GraphQL.Client.Http;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using Poolz.Finance.CSharp.Strapi;
 using GraphQL.Client.Serializer.Newtonsoft;
 using InvestProvider.Backend.Services.Strapi;
 using InvestProvider.Backend.Services.Strapi.Models;
-using InvestProvider.Backend.Services.Web3.Contracts;
-using Net.Web3.EthereumWallet;
-using Xunit;
 
 namespace InvestProvider.Backend.Tests.Services;
 
@@ -63,7 +59,7 @@ public class StrapiClientQueryTests
                     new ComponentContractOnChainContractOnChain
                     {
                         ContractVersion = new Contract { NameVersion = "InvestProvider v1" },
-                        Address = "0x00000000000000000000000000000000000000aa"
+                        Address = "0x00000000000000000000000000000000000000AA"
                     },
                     new ComponentContractOnChainContractOnChain
                     {
@@ -83,7 +79,7 @@ public class StrapiClientQueryTests
         var chainId = 5;
         var result = await client.ReceiveOnChainInfoAsync(chainId);
 
-        Assert.Equal("0x00000000000000000000000000000000000000aa", result.InvestedProvider.ToString());
+        Assert.Equal("0x00000000000000000000000000000000000000AA", result.InvestedProvider.ToString());
         Assert.Equal("0x00000000000000000000000000000000000000bb", result.LockDealNFT.ToString());
     }
 

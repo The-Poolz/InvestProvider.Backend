@@ -1,7 +1,7 @@
+using Xunit;
 using System;
 using System.Linq;
 using Newtonsoft.Json.Linq;
-using Xunit;
 using Net.Web3.EthereumWallet;
 using InvestProvider.Backend.Services.Web3.Eip712.Models;
 
@@ -14,7 +14,7 @@ public class Eip712TypedDataTests
     [Fact]
     public void ToEip712Json_ReturnsOrderedFieldsAndValues()
     {
-        var domain = new Eip712Domain(5, new EthereumAddress("0x00000000000000000000000000000000000000aa"));
+        var domain = new Eip712Domain(5, new EthereumAddress("0x00000000000000000000000000000000000000AA"));
         var message = new InvestMessage(
             poolId: 1,
             userAddress: new EthereumAddress("0x00000000000000000000000000000000000000bb"),
@@ -30,7 +30,7 @@ public class Eip712TypedDataTests
         Assert.Equal(expected, obj.Properties().Select(p => p.Name).ToArray());
         Assert.Equal("InvestMessage", (string)obj["primaryType"]!);
         Assert.Equal(5, (long)obj["domain"]!["chainId"]!);
-        Assert.Equal("0x00000000000000000000000000000000000000aa", (string)obj["domain"]!["verifyingContract"]!);
+        Assert.Equal("0x00000000000000000000000000000000000000AA", (string)obj["domain"]!["verifyingContract"]!);
         Assert.Equal(1, (int)obj["message"]!["poolId"]!);
         Assert.Equal("0x00000000000000000000000000000000000000bb", (string)obj["message"]!["user"]!);
         Assert.Equal(10, (int)obj["message"]!["amount"]!);
